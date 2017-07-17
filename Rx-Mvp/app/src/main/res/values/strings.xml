@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Rx-Mvp</string>
+    <string name="hint_phone">输入想要查询的手机号</string>
+    <string name="submit">提交</string>
+    <string name="login">登录</string>
+    <string name="phone_address">查询号码属地</string>
+</resources>
