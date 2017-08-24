@@ -15,9 +15,8 @@ import java.util.Stack;
  */
 public class ActivityStackManager {
 
-    private static ActivityStackManager instance = new ActivityStackManager();
+    private static ActivityStackManager instance = null;
     private static Stack<Activity> activityStack;// 栈
-    private Context currentContext;// 当前上下文对象
 
     /**
      * 私有构造
@@ -32,6 +31,13 @@ public class ActivityStackManager {
      * @return
      */
     public static ActivityStackManager getManager() {
+        if (instance == null) {
+            synchronized (ActivityStackManager.class) {
+                if (instance == null) {
+                    instance = new ActivityStackManager();
+                }
+            }
+        }
         return instance;
     }
 
@@ -64,25 +70,6 @@ public class ActivityStackManager {
         if (activityStack.isEmpty())
             return null;
         return activityStack.peek();
-    }
-
-    /**
-     * 当前上下文对象，用于弹框使用
-     *
-     * @return
-     */
-    public Context currentContext() {
-        return currentContext;
-    }
-
-
-    /**
-     * 设置当前上下文对象
-     *
-     * @param context
-     */
-    public void setCurrentContext(Context context) {
-        currentContext = context;
     }
 
     /**
@@ -143,7 +130,6 @@ public class ActivityStackManager {
             //清除通知栏
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancelAll();
-            //MobclickAgent.onKillProcess(context);
             android.os.Process.killProcess(android.os.Process.myPid());
         } catch (Exception e) {
         }

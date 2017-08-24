@@ -64,7 +64,6 @@ public abstract class BaseActivity extends RxActivity implements EasyPermissions
         if (mListener != null) {
             mListener.onResume();
         }
-        ActivityStackManager.getManager().setCurrentContext(this);
     }
 
     @Override

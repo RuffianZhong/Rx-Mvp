@@ -60,7 +60,6 @@ public abstract class BaseFragmentActivity extends RxFragmentActivity implements
         if (mListener != null) {
             mListener.onResume();
         }
-        ActivityStackManager.getManager().setCurrentContext(this);
     }
 
     @Override
