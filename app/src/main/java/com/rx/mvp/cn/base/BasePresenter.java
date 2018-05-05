@@ -3,7 +3,6 @@ package com.rx.mvp.cn.base;
 import android.os.Bundle;
 
 import com.rx.mvp.cn.listener.LifeCycleListener;
-import com.rx.mvp.cn.utils.LogUtils;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
