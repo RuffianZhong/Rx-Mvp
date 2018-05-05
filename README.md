@@ -2,154 +2,213 @@
 
 # RxJava2+Retrofit2+RxLifecycle2使用MVP模式构建项目 #
 
+## 项目包结构
+
+![](package.png) 
+
+![](package_model.png) ![](package_core.png) 
+
+> base： 一些基础封装类
+> 
+> core：核心代码 { net(http,socket)-网络 / db-数据库 / bitmap-图片 / view-控件/视图   } 
+> 
+> model：业务模块 { activity / fragment / presenter / biz-业务处理类 / entity-实体类 / iface-view接口  } 
+>        
+> sample：各种使用说明，方便项目维护和新人熟悉  eg: httpSample-http请求框架使用示例
+> 
+> utils：各种工具类
+> 
+> widget：控件（自定义控件/第三方开源控件）
+> 
+
+## RxJava2+Retrofit2+RxLifecycle2
+
 ## Api接口 ##
-    public interface UserApi {
+    public interface Api {
+	    /**
+	     * GET请求
+	     *
+	     * @param url     api接口url
+	     * @param request 请求参数map
+	     * @return
+	     */
+	    @GET
+	    Observable<HttpResponse> get(@Url String url, @QueryMap TreeMap<String, Object> request);
 
-    @GET("user/login")
-    Observable<HttpResponse> login(@QueryMap Map<String, Object> request);
-
+	    /**
+	     * POST请求
+	     *
+	     * @param url     api接口url
+	     * @param request 请求参数map
+	     * @return
+	     */
+	    @FormUrlEncoded
+	    @POST
+	    Observable<HttpResponse> post(@Url String url, @FieldMap TreeMap<String, Object> request);
 	}
 
 
-## 适用Retrofit网络请求Observable(被订阅者) ##
-	public class HttpRxObservable {
+## 定义View接口 ##
+    public interface ILoginView extends IBaseView {
 
-		    /**
-		     * 获取被订阅者
-		     * 备注:网络请求Observable构建
-		     * <h1>补充说明</h1>
-		     * 传入LifecycleProvider自动管理生命周期,避免内存泄漏
-		     * 备注:需要继承RxActivity.../RxFragment...
-		     */
-		    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider lifecycle) {
-		        Observable observable;
-		        observable = apiObservable
-		                .map(new ServerResultFunction())
-		                .compose(lifecycle.bindToLifecycle())//随生命周期自动管理.eg:onCreate(start)->onStop(end)
-		                .onErrorResumeNext(new HttpResultFunction<>())
-		                .subscribeOn(Schedulers.io())
-		                .observeOn(AndroidSchedulers.mainThread());
-		        return observable;
-		    }
-		
-		    /**
-		     * 获取被订阅者
-		     * 备注:网络请求Observable构建
-		     * <h1>补充说明</h1>
-		     * 传入LifecycleProvider<ActivityEvent>手动管理生命周期,避免内存泄漏
-		     * 备注:需要继承RxActivity,RxAppCompatActivity,RxFragmentActivity
-		     */
-		    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider<ActivityEvent> lifecycle, ActivityEvent event) {
-		        Observable observable;
-		        observable = apiObservable
-		                .map(new ServerResultFunction())
-		                .compose(lifecycle.bindUntilEvent(event))//手动管理移除监听生命周期.eg:ActivityEvent.STOP
-		                .onErrorResumeNext(new HttpResultFunction<>())
-		                .subscribeOn(Schedulers.io())
-		                .observeOn(AndroidSchedulers.mainThread());
-		        return observable;
-		    }
+	    //显示结果
+	    void showResult(UserBean bean);
 
 	}
 
-## 适用Retrofit网络请求Observer(订阅者) ##
-    public abstract class HttpRxObserver<T> implements Observer<T>, HttpRequestListener {
+> 这里有部分开发者可能会认为把 `UserBean` 实体传递给 `View(activity/fragment)` 还是会出现 `model` 跟 `view` 的耦合
+> 
+> 个人认为，不一定死脑筋非要完全解耦才是实现了 `MVP` 的模式，这里已经实现了不关心 `UserBean` 的来源和构建方式就可以了
+> 
+> ** # ** 如果非要完全解耦也是可以的 `void showResult(String userName,int userId....)` 要用几个参数就定义几个参数，但是感觉太麻烦了 ** # **
+> 
 
-		    private String mTag;//请求标识
-		
-		    public HttpRxObserver() {
-		    }
-		
-		    public HttpRxObserver(String tag) {
-		        this.mTag = tag;
-		    }
-		
-		    @Override
-		    public void onError(Throwable e) {
-		        RxActionManagerImpl.getInstance().remove(mTag);
-		        if (e instanceof ApiException) {
-		            onError((ApiException) e);
-		        } else {
-		            onError(new ApiException(e, ExceptionEngine.UN_KNOWN_ERROR));
-		        }
-		    }
-		
-		    @Override
-		    public void onComplete() {
-		    }
-		
-		    @Override
-		    public void onNext(@NonNull T t) {
-		        if (!TextUtils.isEmpty(mTag)) {
-		            RxActionManagerImpl.getInstance().remove(mTag);
-		        }
-		        onSuccess(t);
-		    }
-		
-		    @Override
-		    public void onSubscribe(@NonNull Disposable d) {
-		        if (!TextUtils.isEmpty(mTag)) {
-		            RxActionManagerImpl.getInstance().add(mTag, d);
-		        }
-		        onStart(d);
-		    }
-		
-		    @Override
-		    public void cancel() {
-		        if (!TextUtils.isEmpty(mTag)) {
-		            RxActionManagerImpl.getInstance().cancel(mTag);
-		        }
-		    }
-		
-		
-		    protected abstract void onStart(Disposable d);
-		
-		    protected abstract void onError(ApiException e);
-		
-		    protected abstract void onSuccess(T response);
 
-	}
-## 使用 ##
-       public void login(RxActivity activity, String phone, String psw) {
+## Request 请求使用方法 ##
+    /**
+     * 用户登录
+     *
+     * @param userName
+     * @param password
+     * @param lifecycle
+     * @param callback
+     */
+    public void login(String userName, String password, LifecycleProvider lifecycle, HttpRxCallback callback) {
+        /**
+         * 构建请求参数
+         */
+        TreeMap<String, Object> request = new TreeMap<>();
+        request.put("username", userName);
+        request.put("password", password);
+        request.put(HttpRequest.API_URL, "user/login");
 
-		        //构建请求数据
-		        Map<String, Object> request = HttpRequest.getRequest();
-		        request.put("phone", phone);
-		        request.put("psw", psw);
+        /**
+         * 解析数据
+         */
+        callback.setParseHelper(new ParseHelper() {
+            @Override
+            public Object[] parse(JsonElement jsonElement) {
+                UserBean bean = new Gson().fromJson(jsonElement, UserBean.class);
+                Object[] obj = new Object[1];
+                obj[0] = bean;
+                return obj;
+            }
+        });
 
-		        //设置唯一TAG
-		        HttpRxObserver httpRxObserver = new HttpRxObserver("xxx_login") {
-		            @Override
-		            protected void onStart(Disposable d) {
-		            }
-		
-		            @Override
-		            protected void onError(ApiException e) {
-		                LogUtils.w("onError code:" + e.getCode() + " msg:" + e.getMsg());
-		            }
-		
-		            @Override
-		            protected void onSuccess(Object response) {
-		                LogUtils.w("onSuccess response:" + response.toString());
-		            }
-		        };
+        /**
+         * 发送请求
+         */
+        new HttpRequest().request(HttpRequest.Method.POST, request, lifecycle, callback);
 
-		        /**
-		         * 获取请求Observable
-		         * 1.RxActivity,RxFragment...所在页面继承RxLifecycle支持的组件
-		         * 2.ActivityEvent指定监听函数解绑的生命周期（手动管理,未设置则自动管理）
-		         * 以上两点作用防止RxJava监听没解除导致内存泄漏,ActivityEvent若未指定则按照activity/fragment的生命周期
-		         */
-		
-		        HttpRxObservable.getObservable(ApiUtils.getUserApi().login(request), activity).subscribe(httpRxObserver);
-		        //HttpRxObservable.getObservable(ApiUtils.getUserApi().login(request), activity, ActivityEvent.PAUSE).subscribe(httpRxObserver);
-		        
-		        //取消请求
-		        /*if(!httpRxObserver.isDisposed()){
-		            httpRxObserver.cancel();
-		        }*/
     }
 
+### 接口地址动态设置 ###
+
+> 
+> 构建参数时设置 `HttpRequest.API_URL` 接口名称/路径 等价于: `baseUrl + HttpRequest.API_URL`
+> 
+> `http://apicloud.mob.com/ (baseUrl)`  ** + ** ` user/login (HttpRequest.API_URL指定的值)`
+
+### request 请求方法 ###
+     /**
+     * 发送请求
+     * 备注:不管理生命周期
+     *
+     * @param method   请求方式
+     * @param prams    参数集合
+     * @param callback 回调
+     */
+    public void request(HttpRequest.Method method, TreeMap<String, Object> prams, HttpRxCallback callback)
+
+    /**
+     * 发送请求
+     * 备注:自动管理生命周期
+     *
+     * @param method    请求方式
+     * @param lifecycle 实现RxActivity/RxFragment 参数为空不管理生命周期
+     * @param prams     参数集合
+     * @param callback  回调
+     */
+    public void request(HttpRequest.Method method, TreeMap<String, Object> prams,
+						LifecycleProvider lifecycle, HttpRxCallback callback)
 
 
-**CSDN博客地址，文章说明：http://blog.csdn.net/u014702653/article/details/75268919**
+    /**
+     * 发送请求
+     * 备注:手动指定生命周期-Activity
+     *
+     * @param method    请求方式
+     * @param lifecycle 实现RxActivity
+     * @param event     指定生命周期
+     * @param prams     参数集合
+     * @param callback  回调
+     */
+    public void request(HttpRequest.Method method, TreeMap<String, Object> prams, 
+						LifecycleProvider<ActivityEvent> lifecycle, ActivityEvent event, HttpRxCallback callback)    
+
+## Presenter 中使用 ##
+    public class LoginPresenter extends BasePresenter<ILoginView, LoginActivity> {
+
+    	private final String TAG = PhoneAddressPresenter.class.getSimpleName();
+
+	    public LoginPresenter(ILoginView view, LoginActivity activity) {
+	        super(view, activity);
+	    }
+
+	    public void login(String userName, String password) {
+	
+	        if (getView() != null)
+	            getView().showLoading();
+	
+	        HttpRxCallback httpRxCallback = new HttpRxCallback(TAG + "login") {
+	            @Override
+	            public void onSuccess(Object... object) {
+	                if (getView() != null) {
+	                    getView().closeLoading();
+	                    getView().showResult((UserBean) object[0]);
+	                }
+	            }
+	
+	            @Override
+	            public void onError(int code, String desc) {
+	                if (getView() != null) {
+	                    getView().closeLoading();
+	                    getView().showToast(desc);
+	                }
+	            }
+	        };
+	
+	        new UserBiz().login(userName, password, getActivity(), httpRxCallback);
+	
+	        /**
+	         * ******此处代码为了测试取消请求,不是规范代码*****
+	         */
+	        /*try {
+	            Thread.sleep(50);
+	            //取消请求
+	            if (!httpRxCallback.isDisposed()) {
+	                httpRxCallback.cancel();
+	            }
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }*/
+	    }
+	}
+ 
+
+> 通常情况下使用 `LifecycleProvider` 自动管理生命周期就不需要手动取消请求
+> 
+> 如果在特殊场景需要开发者取消请求则使用 `httpRxCallback.cancel()`
+
+     /**
+     * 文档说明有限
+     *
+     * 强烈建议阅读代码，在此基础上改造成适用自己项目的框架
+     *
+     * 欢迎提供建议/意见，不断完善框架
+     */
+
+
+原始构造想法参考博客
+
+**CSDN博客地址：http://blog.csdn.net/u014702653/article/details/75268919**
