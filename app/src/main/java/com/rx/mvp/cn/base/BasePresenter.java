@@ -1,6 +1,9 @@
 package com.rx.mvp.cn.base;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 
 import com.rx.mvp.cn.listener.LifeCycleListener;
 
@@ -38,6 +41,8 @@ public class BasePresenter<V, T> implements LifeCycleListener {
                 ((BaseActivity) getActivity()).setOnLifeCycleListener(this);
             } else if (activity instanceof BaseFragmentActivity) {
                 ((BaseFragmentActivity) getActivity()).setOnLifeCycleListener(this);
+            } else if (activity instanceof BaseFragment) {
+                ((BaseFragment) activity).setOnLifeCycleListener(this);
             }
         }
     }
@@ -158,5 +163,31 @@ public class BasePresenter<V, T> implements LifeCycleListener {
     public void onDestroy() {
         detachView();
         detachActivity();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+
+    }
+
+    @Override
+    public void onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        detachView();
+        detachActivity();
+    }
+
+    @Override
+    public void onDetach() {
+
     }
 }

@@ -1,27 +1,27 @@
-package com.rx.mvp.cn.model.account.activity;
+package com.rx.mvp.cn.model.multiple;
 
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
 import com.rx.mvp.cn.R;
-import com.rx.mvp.cn.base.BaseActivity;
+import com.rx.mvp.cn.base.BaseFragment;
 import com.rx.mvp.cn.model.account.entity.UserBean;
+import com.rx.mvp.cn.model.account.iface.ILoginView;
 import com.rx.mvp.cn.model.account.presenter.LoginPresenter;
 import com.rx.mvp.cn.utils.ToastUtils;
-import com.rx.mvp.cn.model.account.iface.ILoginView;
 import com.rx.mvp.cn.widget.RLoadingDialog;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
 /**
- * 登录
+ * 登录Fragment
  *
  * @author ZhongDaFeng
  */
-
-public class LoginActivity extends BaseActivity implements ILoginView {
+public class LoginFragment extends BaseFragment implements ILoginView {
 
     @BindView(R.id.et_user_name)
     EditText etUserName;
@@ -33,8 +33,8 @@ public class LoginActivity extends BaseActivity implements ILoginView {
     private RLoadingDialog mLoadingDialog;
 
     @Override
-    protected int getContentViewId() {
-        return R.layout.activity_login;
+    protected View getContentView() {
+        return LayoutInflater.from(mContext).inflate(R.layout.activity_login, null);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class LoginActivity extends BaseActivity implements ILoginView {
 
     @Override
     protected void initView() {
-        mLoadingDialog = new RLoadingDialog(this, true);
+        mLoadingDialog = new RLoadingDialog(mContext, true);
     }
 
     @Override

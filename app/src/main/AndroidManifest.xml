@@ -20,6 +20,7 @@
 
         <activity android:name=".model.account.activity.LoginActivity" />
         <activity android:name=".model.other.activity.PhoneAddressActivity" />
+        <activity android:name=".model.multiple.MultipleActivity" />
     </application>
 
 </manifest>

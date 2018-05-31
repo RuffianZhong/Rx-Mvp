@@ -7,7 +7,6 @@ import com.rx.mvp.cn.listener.LifeCycleListener;
 import com.rx.mvp.cn.manager.ActivityStackManager;
 import com.trello.rxlifecycle2.components.RxActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -27,6 +26,7 @@ public abstract class BaseActivity extends RxActivity implements EasyPermissions
 
     protected Context mContext;
     protected Unbinder unBinder;
+    public LifeCycleListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,8 @@ public abstract class BaseActivity extends RxActivity implements EasyPermissions
         mContext = this;
         unBinder = ButterKnife.bind(this);
         initBundleData();
-        init();
+        initView();
+        initData();
     }
 
     @Override
@@ -114,22 +115,27 @@ public abstract class BaseActivity extends RxActivity implements EasyPermissions
      */
     protected abstract int getContentViewId();
 
-    /**
-     * 初始化应用程序，设置一些初始化数据,获取数据等操作
-     */
-    protected abstract void init();
 
     /**
      * 获取上一个界面传送过来的数据
      */
     protected abstract void initBundleData();
 
+    /**
+     * 初始化view
+     */
+    protected abstract void initView();
 
     /**
-     * 回调函数
+     * 初始化Data
      */
-    public LifeCycleListener mListener;
+    protected abstract void initData();
 
+    /**
+     * 设置生命周期回调函数
+     *
+     * @param listener
+     */
     public void setOnLifeCycleListener(LifeCycleListener listener) {
         mListener = listener;
     }

@@ -6,6 +6,7 @@ import android.view.View;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.model.account.activity.LoginActivity;
+import com.rx.mvp.cn.model.multiple.MultipleActivity;
 import com.rx.mvp.cn.model.other.activity.PhoneAddressActivity;
 
 import butterknife.OnClick;
@@ -18,15 +19,21 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void init() {
+    protected void initBundleData() {
 
     }
 
     @Override
-    protected void initBundleData() {
+    protected void initView() {
+
     }
 
-    @OnClick({R.id.login, R.id.phone_address})
+    @Override
+    protected void initData() {
+
+    }
+
+    @OnClick({R.id.login, R.id.phone_address, R.id.multiple})
     public void onClick(View v) {
         Intent intent;
         switch (v.getId()) {
@@ -36,6 +43,10 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.phone_address:
                 intent = new Intent(this, PhoneAddressActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.multiple:
+                intent = new Intent(this, MultipleActivity.class);
                 startActivity(intent);
                 break;
         }

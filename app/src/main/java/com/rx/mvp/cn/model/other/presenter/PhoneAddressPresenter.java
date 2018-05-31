@@ -6,6 +6,7 @@ import com.rx.mvp.cn.model.other.activity.PhoneAddressActivity;
 import com.rx.mvp.cn.model.other.biz.OtherBiz;
 import com.rx.mvp.cn.model.other.entity.AddressBean;
 import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 /**
  * 手机号归属地Presenter
@@ -13,11 +14,11 @@ import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
  * @author ZhongDaFeng
  */
 
-public class PhoneAddressPresenter extends BasePresenter<IPhoneAddressView, PhoneAddressActivity> {
+public class PhoneAddressPresenter extends BasePresenter<IPhoneAddressView, LifecycleProvider> {
 
     private final String TAG = PhoneAddressPresenter.class.getSimpleName();
 
-    public PhoneAddressPresenter(IPhoneAddressView view, PhoneAddressActivity activity) {
+    public PhoneAddressPresenter(IPhoneAddressView view, LifecycleProvider activity) {
         super(view, activity);
     }
 

@@ -25,18 +25,22 @@ public abstract class BaseFragmentActivity extends RxFragmentActivity implements
 
     protected Context mContext;
     protected Unbinder unBinder;
+    public LifeCycleListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (mListener != null) {
+            mListener.onCreate(savedInstanceState);
+        }
         ActivityStackManager.getManager().push(this);
         setContentView(getContentViewId());
         mContext = this;
         unBinder = ButterKnife.bind(this);
         initBundleData();
-        init();
+        initView();
+        initData();
     }
-
 
     @Override
     protected void onStart() {
@@ -110,22 +114,27 @@ public abstract class BaseFragmentActivity extends RxFragmentActivity implements
      */
     protected abstract int getContentViewId();
 
-    /**
-     * 初始化应用程序，设置一些初始化数据,获取数据等操作
-     */
-    protected abstract void init();
 
     /**
      * 获取上一个界面传送过来的数据
      */
     protected abstract void initBundleData();
 
+    /**
+     * 初始化view
+     */
+    protected abstract void initView();
 
     /**
-     * 回调函数
+     * 初始化Data
      */
-    public LifeCycleListener mListener;
+    protected abstract void initData();
 
+    /**
+     * 设置生命周期回调函数
+     *
+     * @param listener
+     */
     public void setOnLifeCycleListener(LifeCycleListener listener) {
         mListener = listener;
     }

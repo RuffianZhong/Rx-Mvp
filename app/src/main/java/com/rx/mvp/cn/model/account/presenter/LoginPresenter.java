@@ -7,6 +7,7 @@ import com.rx.mvp.cn.model.account.biz.UserBiz;
 import com.rx.mvp.cn.model.account.entity.UserBean;
 import com.rx.mvp.cn.model.other.presenter.PhoneAddressPresenter;
 import com.rx.mvp.cn.model.account.iface.ILoginView;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 /**
  * 登录Presenter
@@ -14,11 +15,11 @@ import com.rx.mvp.cn.model.account.iface.ILoginView;
  * @author ZhongDaFeng
  */
 
-public class LoginPresenter extends BasePresenter<ILoginView, LoginActivity> {
+public class LoginPresenter extends BasePresenter<ILoginView, LifecycleProvider> {
 
     private final String TAG = PhoneAddressPresenter.class.getSimpleName();
 
-    public LoginPresenter(ILoginView view, LoginActivity activity) {
+    public LoginPresenter(ILoginView view, LifecycleProvider activity) {
         super(view, activity);
     }
 

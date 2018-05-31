@@ -43,4 +43,5 @@ dependencies {
     /*网络请求框架*/
     compile 'pub.devrel:easypermissions:0.4.2'
     /*动态权限*/
+    compile 'com.ruffian.library:RVPIndicator:1.0.6'
 }

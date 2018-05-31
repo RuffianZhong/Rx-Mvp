@@ -1,30 +1,29 @@
-package com.rx.mvp.cn.model.other.activity;
+package com.rx.mvp.cn.model.multiple;
 
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rx.mvp.cn.R;
-import com.rx.mvp.cn.base.BaseActivity;
+import com.rx.mvp.cn.base.BaseFragment;
 import com.rx.mvp.cn.model.other.entity.AddressBean;
+import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
 import com.rx.mvp.cn.model.other.presenter.PhoneAddressPresenter;
 import com.rx.mvp.cn.utils.ToastUtils;
-import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
 import com.rx.mvp.cn.widget.RLoadingDialog;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
 /**
- * 手机号码归属地查询页面
+ * 手机号码归属地查询Fragment
  *
  * @author ZhongDaFeng
  */
-
-public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressView {
-
+public class PhoneAddressFragment extends BaseFragment implements IPhoneAddressView {
 
     @BindView(R.id.et_phone)
     EditText etPhone;
@@ -41,8 +40,8 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
     private RLoadingDialog mLoadingDialog;
 
     @Override
-    protected int getContentViewId() {
-        return R.layout.activity_phone_address;
+    protected View getContentView() {
+        return LayoutInflater.from(mContext).inflate(R.layout.activity_phone_address, null);
     }
 
     @Override
@@ -52,14 +51,13 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
 
     @Override
     protected void initView() {
-        mLoadingDialog = new RLoadingDialog(this, true);
+        mLoadingDialog = new RLoadingDialog(mContext, true);
     }
 
     @Override
     protected void initData() {
 
     }
-
 
     @OnClick({R.id.submit})
     public void onClick(View v) {

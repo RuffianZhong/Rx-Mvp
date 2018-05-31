@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <com.ruffian.library.RVPIndicator
+        android:id="@+id/vp_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:background="@color/colorPrimary"
+        app:indicator_color="@android:color/white"
+        app:indicator_style="triangle"
+        app:indicator_visible_count="2"
+        app:indicator_width="16dp"
+        app:text_color_normal="#bebdbd"
+        app:text_color_selected="#ffffff" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
