@@ -176,6 +176,13 @@
 	                    getView().showToast(desc);
 	                }
 	            }
+
+	            @Override
+	            public void onCancel() {
+	                if (getView() != null) {
+	                    getView().closeLoading();
+	                }
+	            }
 	        };
 	
 	        new UserBiz().login(userName, password, getActivity(), httpRxCallback);
