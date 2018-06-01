@@ -51,6 +51,13 @@ public class PhoneAddressPresenter extends BasePresenter<IPhoneAddressView, Life
                     getView().showToast(desc);
                 }
             }
+
+            @Override
+            public void onCancel() {
+                if (getView() != null) {
+                    getView().closeLoading();
+                }
+            }
         });
 
 
