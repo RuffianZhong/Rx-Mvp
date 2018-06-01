@@ -34,6 +34,7 @@ public abstract class HttpRxCallback<T> implements Observer<T>, HttpRequestListe
     private ParseHelper parseHelper;//数据解析
 
     public HttpRxCallback() {
+        this.mTag = String.valueOf(System.currentTimeMillis());
     }
 
     public HttpRxCallback(String tag) {
@@ -91,11 +92,23 @@ public abstract class HttpRxCallback<T> implements Observer<T>, HttpRequestListe
         }
     }
 
+    /**
+     * 手动取消请求
+     */
     @Override
     public void cancel() {
         if (!TextUtils.isEmpty(mTag)) {
             RxActionManagerImpl.getInstance().cancel(mTag);
         }
+    }
+
+
+    /**
+     * 请求被取消回调
+     */
+    @Override
+    public void onCanceled() {
+        onCancel();
     }
 
     /**
@@ -133,5 +146,10 @@ public abstract class HttpRxCallback<T> implements Observer<T>, HttpRequestListe
      * @param desc
      */
     public abstract void onError(int code, String desc);
+
+    /**
+     * 取消回调
+     */
+    public abstract void onCancel();
 
 }

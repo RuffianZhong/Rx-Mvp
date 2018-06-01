@@ -13,6 +13,7 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -31,11 +32,18 @@ public class HttpRxObservable {
      *
      * @author ZhongDaFeng
      */
-    public static Observable getObservable(Observable<HttpResponse> apiObservable) {
-       // showLog(request);
+    public static Observable getObservable(Observable<HttpResponse> apiObservable, final HttpRxCallback callback) {
+        // showLog(request);
         Observable observable = apiObservable
                 .map(new ServerResultFunction())
                 .onErrorResumeNext(new HttpResultFunction<>())
+                .doOnDispose(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        if (callback != null)
+                            callback.onCanceled();
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
         return observable;
@@ -52,20 +60,28 @@ public class HttpRxObservable {
      *
      * @author ZhongDaFeng
      */
-    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider lifecycle) {
+    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider lifecycle, final HttpRxCallback callback) {
         //showLog(request);
         Observable observable;
 
         if (lifecycle != null) {
             //随生命周期自动管理.eg:onCreate(start)->onStop(end)
-            observable =apiObservable
+            observable = apiObservable
                     .map(new ServerResultFunction())
                     .compose(lifecycle.bindToLifecycle())//需要在这个位置添加
                     .onErrorResumeNext(new HttpResultFunction<>())
+                    .doOnDispose(new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            if (callback != null)
+                                callback.onCanceled();
+                        }
+                    })
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
+                    .observeOn(AndroidSchedulers.mainThread())
+            ;
         } else {
-            observable = getObservable(apiObservable);
+            observable = getObservable(apiObservable, callback);
         }
         return observable;
     }
@@ -80,8 +96,8 @@ public class HttpRxObservable {
      *
      * @author ZhongDaFeng
      */
-    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider<ActivityEvent> lifecycle, ActivityEvent event) {
-       // showLog(request);
+    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider<ActivityEvent> lifecycle, ActivityEvent event, final HttpRxCallback callback) {
+        // showLog(request);
         Observable observable;
         if (lifecycle != null) {
             //手动管理移除监听生命周期.eg:ActivityEvent.STOP
@@ -89,10 +105,17 @@ public class HttpRxObservable {
                     .map(new ServerResultFunction())
                     .compose(lifecycle.bindUntilEvent(event))//需要在这个位置添加
                     .onErrorResumeNext(new HttpResultFunction<>())
+                    .doOnDispose(new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            if (callback != null)
+                                callback.onCanceled();
+                        }
+                    })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());
         } else {
-            observable = getObservable(apiObservable);
+            observable = getObservable(apiObservable, callback);
         }
         return observable;
     }
@@ -108,8 +131,8 @@ public class HttpRxObservable {
      *
      * @author ZhongDaFeng
      */
-    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider<FragmentEvent> lifecycle, FragmentEvent event) {
-      //  showLog(request);
+    public static Observable getObservable(Observable<HttpResponse> apiObservable, LifecycleProvider<FragmentEvent> lifecycle, FragmentEvent event, final HttpRxCallback callback) {
+        //  showLog(request);
         Observable observable;
         if (lifecycle != null) {
             //手动管理移除监听生命周期.eg:FragmentEvent.STOP
@@ -117,10 +140,17 @@ public class HttpRxObservable {
                     .map(new ServerResultFunction())
                     .compose(lifecycle.bindUntilEvent(event))//需要在这个位置添加
                     .onErrorResumeNext(new HttpResultFunction<>())
+                    .doOnDispose(new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            if (callback != null)
+                                callback.onCanceled();
+                        }
+                    })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());
         } else {
-            observable = getObservable(apiObservable);
+            observable = getObservable(apiObservable, callback);
         }
         return observable;
     }

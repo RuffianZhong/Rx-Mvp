@@ -44,7 +44,7 @@ public class HttpRequest {
 
         Observable<HttpResponse> apiObservable = handleRequest(method, prams);
 
-        HttpRxObservable.getObservable(apiObservable).subscribe(callback);
+        HttpRxObservable.getObservable(apiObservable, callback).subscribe(callback);
 
     }
 
@@ -61,7 +61,7 @@ public class HttpRequest {
     public void request(Method method, TreeMap<String, Object> prams, LifecycleProvider lifecycle, HttpRxCallback callback) {
         Observable<HttpResponse> apiObservable = handleRequest(method, prams);
 
-        HttpRxObservable.getObservable(apiObservable, lifecycle).subscribe(callback);
+        HttpRxObservable.getObservable(apiObservable, lifecycle, callback).subscribe(callback);
     }
 
 
@@ -78,7 +78,7 @@ public class HttpRequest {
     public void request(Method method, TreeMap<String, Object> prams, LifecycleProvider<ActivityEvent> lifecycle, ActivityEvent event, HttpRxCallback callback) {
         Observable<HttpResponse> apiObservable = handleRequest(method, prams);
 
-        HttpRxObservable.getObservable(apiObservable, lifecycle, event).subscribe(callback);
+        HttpRxObservable.getObservable(apiObservable, lifecycle, event, callback).subscribe(callback);
     }
 
 
@@ -95,7 +95,7 @@ public class HttpRequest {
     public void request(Method method, TreeMap<String, Object> prams, LifecycleProvider<FragmentEvent> lifecycle, FragmentEvent event, HttpRxCallback callback) {
         Observable<HttpResponse> apiObservable = handleRequest(method, prams);
 
-        HttpRxObservable.getObservable(apiObservable, lifecycle, event).subscribe(callback);
+        HttpRxObservable.getObservable(apiObservable, lifecycle, event, callback).subscribe(callback);
     }
 
 

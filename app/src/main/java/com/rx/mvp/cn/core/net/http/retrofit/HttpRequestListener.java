@@ -6,6 +6,14 @@ package com.rx.mvp.cn.core.net.http.retrofit;
  * @author ZhongDaFeng
  */
 public interface HttpRequestListener {
-    //取消请求
+
+    /**
+     * 取消请求
+     */
     void cancel();
+
+    /**
+     * 请求被取消
+     */
+    void onCanceled();
 }
