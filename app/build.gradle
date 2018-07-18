@@ -1,5 +1,17 @@
 apply plugin: 'com.android.application'
 
+/**
+ * API域名
+ */
+//正式服
+def API_HOST_RELEASE = "\"http://apicloud.mob.com/\""
+//测试服(外网)
+def API_HOST_TEST = "\"http://apicloud.mob.com/\""
+//开发环境(内网)
+def API_HOST_DEV = "\"http://192.168.102.224:8080/api/\""
+
+
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
@@ -8,15 +20,105 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+    //签名配置
+    signingConfigs {
+        config {
+            keyAlias 'ruffian'
+            keyPassword 'abc123456'
+            storeFile file('../rxmvp.jks')
+            storePassword 'abc123456'
+        }
+        debug {
+            keyAlias 'ruffian'
+            keyPassword 'abc123456'
+            storeFile file('../rxmvp.jks')
+            storePassword 'abc123456'
         }
     }
+
+    //多渠道打包
+    productFlavors {
+        ANDROID_NORMAL {
+            buildConfigField "String", "CHANNEL", "\"ANDROID_NORMAL\""
+        }
+        ANDROID_CHINA {
+            buildConfigField "String", "CHANNEL", "\"ANDROID_CHINA\""
+        }
+        ANDROID_ES {
+            buildConfigField "String", "CHANNEL", "\"ANDROID_ES\""
+        }
+    }
+
+    //构建类型
+    buildTypes {
+        official {
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            buildConfigField "String", "API_HOST", "${API_HOST_RELEASE}"
+            buildConfigField "boolean", "IS_DEBUG", "false"
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            buildConfigField "boolean", "IS_DEBUG", "true"
+            buildConfigField "String", "API_HOST", "${API_HOST_RELEASE}"
+            signingConfig signingConfigs.config
+        }
+        intranet {
+            // 显示Log  https://blog.csdn.net/u014637428/article/details/52249423?locationNum=14
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            buildConfigField "boolean", "IS_DEBUG", "true"
+            buildConfigField "String", "API_HOST", "${API_HOST_TEST}"
+            signingConfig signingConfigs.config
+            debuggable true
+        }
+        extranet {
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            buildConfigField "boolean", "IS_DEBUG", "true"
+            buildConfigField "String", "API_HOST", "${API_HOST_DEV}"
+            signingConfig signingConfigs.config
+            debuggable true
+        }
+
+        // 批量打包(gradle 3.0.0 以下)  https://www.jianshu.com/p/533240d222d3
+        applicationVariants.all { variant ->
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    //输出apk名称为：渠道名_版本名_时间.apk
+                    def fileName
+                    if (!project.hasProperty('FILE_NAME')) {
+                        //fileName = "RxMvp_${variant.productFlavors[0].name}_v${defaultConfig.versionCode}_${releaseTime()}.apk"
+                        if (variant.buildType.name.equals('release')) {
+                            fileName = "RxMvp_v${defaultConfig.versionCode}_release.apk"
+                        } else if (variant.buildType.name.equals('debug')) {
+                            fileName = "RxMvp_v${defaultConfig.versionCode}_debug.apk"
+                        } else if (variant.buildType.name.equals('inside')) {
+                            fileName = "RxMvp_v${defaultConfig.versionCode}_inside.apk"
+                        } else if (variant.buildType.name.equals('outside')) {
+                            fileName = "RxMvp_v${defaultConfig.versionCode}_outside.apk"
+                        } else {
+                            fileName = "RxMvp_v${defaultConfig.versionCode}.apk"
+                        }
+                    } else {
+                        fileName = FILE_NAME
+                    }
+                    output.outputFile = new File(outputFile.parent, fileName)
+                }
+            }
+        }
+
+    }
+
 }
 
 dependencies {
