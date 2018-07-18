@@ -2,6 +2,8 @@ package com.rx.mvp.cn.utils;
 
 import android.util.Log;
 
+import com.rx.mvp.cn.BuildConfig;
+
 /**
  * LOG工具类
  *
@@ -15,6 +17,10 @@ public class LogUtils {
     private static boolean allowI = true;
     private static boolean allowV = true;
     private static boolean allowW = true;
+
+    static {
+        allowD = allowE = allowI = allowV = allowW = BuildConfig.LOG_DEBUG;
+    }
 
     private LogUtils() {
     }

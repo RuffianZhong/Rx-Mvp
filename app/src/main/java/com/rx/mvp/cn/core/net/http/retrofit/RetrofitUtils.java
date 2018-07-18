@@ -1,5 +1,6 @@
 package com.rx.mvp.cn.core.net.http.retrofit;
 
+import com.rx.mvp.cn.BuildConfig;
 import com.rx.mvp.cn.utils.LogUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class RetrofitUtils {
     /**
      * 接口地址
      */
-    public static final String BASE_API = "http://apicloud.mob.com/";
+    public static final String BASE_API = BuildConfig.API_HOST;//http://apicloud.mob.com/
     public static final int CONNECT_TIME_OUT = 30;//连接超时时长x秒
     public static final int READ_TIME_OUT = 30;//读数据超时时长x秒
     public static final int WRITE_TIME_OUT = 30;//写数据接超时时长x秒

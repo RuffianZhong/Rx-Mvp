@@ -76,7 +76,7 @@ android {
             // 显示Log  https://blog.csdn.net/u014637428/article/details/52249423?locationNum=14
             buildConfigField "boolean", "LOG_DEBUG", "true"
             buildConfigField "boolean", "IS_DEBUG", "true"
-            buildConfigField "String", "API_HOST", "${API_HOST_TEST}"
+            buildConfigField "String", "API_HOST", "${API_HOST_DEV}"
             signingConfig signingConfigs.config
             debuggable true
         }
@@ -84,7 +84,7 @@ android {
             // 显示Log
             buildConfigField "boolean", "LOG_DEBUG", "true"
             buildConfigField "boolean", "IS_DEBUG", "true"
-            buildConfigField "String", "API_HOST", "${API_HOST_DEV}"
+            buildConfigField "String", "API_HOST", "${API_HOST_TEST}"
             signingConfig signingConfigs.config
             debuggable true
         }
