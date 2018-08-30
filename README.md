@@ -63,9 +63,11 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
 
 ![](upload.gif) ![](download.gif) 
 
-RHttp 使用 demo文档
 
-RHttp 详解文档 
+## [RHttp 使用 demo文档](https://github.com/RuffianZhong/Rx-Mvp/blob/master/RHttp_demo.md)
+
+## [RHttp 详解文档](https://github.com/RuffianZhong/Rx-Mvp/blob/master/RHttp.md)
+
 
 
 ## MVP
@@ -190,9 +192,14 @@ public class BasePresenter<V, T> {
 ```
 
 ```
-1. 这里有部分开发者可能会认为把 `UserBean` 实体传递给 `View(activity/fragment)` 还是会出现 `model` 跟 `view` 的耦合
-2. 个人认为，不一定死脑筋非要完全解耦才是实现了 `MVP` 的模式，这里已经实现了不关心 `UserBean` 的来源和构建方式就可以了
-3. 如果非要完全解耦也是可以的 `void showResult(String userName,int userId....)` 要用几个参数就定义几个参数，但是感觉太麻烦了
+
+1. 有部分开发者可能会认为把 `UserBean` 实体传递给 `View(activity/fragment)` 还是会出现 `model` 跟 `view` 的耦合
+
+2. 个人认为，不一定死脑筋非要完全解耦才是实现了 `MVP` 的模式，这里已经实现不关心 `UserBean` 的来源和构建就行了
+
+3. 如果非要完全解耦也是可以的，将 UserBean 拆解成"基本数据类型" 
+  `void showResult(String userName,int userId....)` 要用几个参数就定义几个参数，但是感觉太麻烦了
+
 ```
 
 ```
