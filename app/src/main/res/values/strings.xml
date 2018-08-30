@@ -5,4 +5,6 @@
     <string name="login">登录</string>
     <string name="phone_address">查询号码属地</string>
     <string name="multiple">综合演示</string>
+    <string name="upload">上传文件</string>
+    <string name="download">下载文件</string>
 </resources>

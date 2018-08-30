@@ -7,9 +7,9 @@ import android.widget.EditText;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.model.account.entity.UserBean;
+import com.rx.mvp.cn.model.account.iface.ILoginView;
 import com.rx.mvp.cn.model.account.presenter.LoginPresenter;
 import com.rx.mvp.cn.utils.ToastUtils;
-import com.rx.mvp.cn.model.account.iface.ILoginView;
 import com.rx.mvp.cn.widget.RLoadingDialog;
 
 import butterknife.BindView;
@@ -64,10 +64,15 @@ public class LoginActivity extends BaseActivity implements ILoginView {
                 }
 
                 mLoginPresenter.login(userName, password);
+
                 break;
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
     @Override
     public void showResult(UserBean bean) {

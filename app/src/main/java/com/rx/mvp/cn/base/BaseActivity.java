@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.rx.mvp.cn.listener.LifeCycleListener;
 import com.rx.mvp.cn.manager.ActivityStackManager;
 import com.trello.rxlifecycle2.components.RxActivity;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  *
  * @author ZhongDaFeng
  */
-public abstract class BaseActivity extends RxActivity implements EasyPermissions.PermissionCallbacks {
+public abstract class BaseActivity extends RxAppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
     protected Context mContext;
     protected Unbinder unBinder;

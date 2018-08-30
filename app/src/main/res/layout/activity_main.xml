@@ -27,4 +27,16 @@
         android:layout_height="wrap_content"
         android:text="@string/multiple" />
 
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/upload" />
+
+    <Button
+        android:id="@+id/download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/download" />
+
 </LinearLayout>

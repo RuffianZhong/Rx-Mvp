@@ -1,8 +1,9 @@
 package com.rx.mvp.cn.model.other.presenter;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.rx.mvp.cn.base.BasePresenter;
-import com.rx.mvp.cn.core.net.http.observer.HttpRxCallback;
-import com.rx.mvp.cn.model.other.activity.PhoneAddressActivity;
+import com.rx.mvp.cn.core.net.http.RHttpCallback;
 import com.rx.mvp.cn.model.other.biz.OtherBiz;
 import com.rx.mvp.cn.model.other.entity.AddressBean;
 import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
@@ -34,13 +35,17 @@ public class PhoneAddressPresenter extends BasePresenter<IPhoneAddressView, Life
         if (getView() != null)
             getView().showLoading();
 
-        //请求
-        new OtherBiz().phoneQuery(phone, getActivity(), new HttpRxCallback() {
+        RHttpCallback httpCallback = new RHttpCallback<AddressBean>() {
             @Override
-            public void onSuccess(Object... object) {
+            public AddressBean convert(JsonElement data) {
+                return new Gson().fromJson(data, AddressBean.class);
+            }
+
+            @Override
+            public void onSuccess(AddressBean value) {
                 if (getView() != null) {
                     getView().closeLoading();
-                    getView().showResult((AddressBean) object[0]);
+                    getView().showResult(value);
                 }
             }
 
@@ -58,7 +63,10 @@ public class PhoneAddressPresenter extends BasePresenter<IPhoneAddressView, Life
                     getView().closeLoading();
                 }
             }
-        });
+        };
+
+        //请求
+        new OtherBiz().phoneQuery(phone, getActivity(), httpCallback);
 
 
     }

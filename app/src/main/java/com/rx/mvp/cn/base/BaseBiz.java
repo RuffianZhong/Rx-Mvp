@@ -1,6 +1,6 @@
 package com.rx.mvp.cn.base;
 
-import com.rx.mvp.cn.core.net.http.retrofit.HttpRequest;
+import java.util.TreeMap;
 
 /**
  * 基础业务类
@@ -10,17 +10,17 @@ import com.rx.mvp.cn.core.net.http.retrofit.HttpRequest;
 public class BaseBiz {
 
 
-    protected HttpRequest mHttpRequest;
+    public static final String API_URL = "API_URL";
+    public final String appKey = "1889b37351288";
+    public final String k_key = "key";
 
-    public BaseBiz() {
-        mHttpRequest = new HttpRequest();
-    }
-
-    protected HttpRequest getRequest() {
-        if (mHttpRequest == null) {
-            mHttpRequest = new HttpRequest();
-        }
-        return mHttpRequest;
+    /**
+     * 获取基础request参数
+     */
+    public TreeMap<String, Object> getBaseRequest() {
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put(k_key, appKey);
+        return map;
     }
 
 

@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.rx.mvp.cn">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".model.RApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".model.MainActivity">
+
+        <activity
+            android:name=".model.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -18,9 +25,21 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".model.account.activity.LoginActivity" />
-        <activity android:name=".model.other.activity.PhoneAddressActivity" />
-        <activity android:name=".model.multiple.MultipleActivity" />
+        <activity
+            android:name=".model.account.activity.LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model.other.activity.PhoneAddressActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model.multiple.MultipleActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model.load.upload.UploadActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".model.load.download.DownloadActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

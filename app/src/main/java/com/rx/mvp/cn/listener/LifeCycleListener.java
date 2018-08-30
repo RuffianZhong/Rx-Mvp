@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import java.security.PrivilegedAction;
+
 /**
  * 生命周期监听
  *
