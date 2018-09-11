@@ -10,7 +10,6 @@ import java.util.TreeMap;
 public class BaseBiz {
 
 
-    public static final String API_URL = "API_URL";
     public final String appKey = "1889b37351288";
     public final String k_key = "key";
 
