@@ -61,7 +61,7 @@ public class RApp extends Application {
 ```
 - `addParameter()`  表示添加参数，重复调用可叠加
 - `setParameter() ` 表示重置参数，清空之前设置
-- `setBodyString(String text,boolean isJson) ` 表示 `String/json` 格式提交数据，会使 `add/setParameter` 设置的参数无效；
+- `setBodyString(String text,boolean isJson) ` （只支持POST）表示 `String/json` 格式提交数据，会使 `add/setParameter` 设置的参数无效；
   `boolean isJson` 参数意义： `true` 表示json格式 ； `false` 表示String格式   
 - `baseUrl()`  基础URL，如果全局配置了，这里可以省略
 - `apiUrl()`   基础路径 如果不需要可以不设置
