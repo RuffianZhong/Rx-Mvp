@@ -14,6 +14,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.Header;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.Multipart;
@@ -43,11 +44,6 @@ public interface Api {
     @GET
     Observable<JsonElement> get(@Url String url, @QueryMap Map<String, Object> parameter, @HeaderMap Map<String, Object> header);
 
-    /**
-     * @param requestBody 用于String/JSON格式数据
-     */
-    @GET
-    Observable<JsonElement> get(@Url String url, @Body RequestBody requestBody, @HeaderMap Map<String, Object> header);
 
     /**
      * POST 请求
@@ -61,11 +57,13 @@ public interface Api {
     @POST
     Observable<JsonElement> post(@Url String url, @FieldMap Map<String, Object> parameter, @HeaderMap Map<String, Object> header);
 
+
     /**
      * @param requestBody 用于String/JSON格式数据
      */
     @POST
     Observable<JsonElement> post(@Url String url, @Body RequestBody requestBody, @HeaderMap Map<String, Object> header);
+
 
     /**
      * DELETE 请求
@@ -75,15 +73,9 @@ public interface Api {
      * @param header    请求头map
      * @return
      */
-    @FormUrlEncoded
     @DELETE
-    Observable<JsonElement> delete(@Url String url, @FieldMap Map<String, Object> parameter, @HeaderMap Map<String, Object> header);
+    Observable<JsonElement> delete(@Url String url, @QueryMap Map<String, Object> parameter, @HeaderMap Map<String, Object> header);
 
-    /**
-     * @param requestBody 用于String/JSON格式数据
-     */
-    @DELETE
-    Observable<JsonElement> delete(@Url String url, @Body RequestBody requestBody, @HeaderMap Map<String, Object> header);
 
     /**
      * PUT 请求
@@ -96,12 +88,6 @@ public interface Api {
     @FormUrlEncoded
     @PUT
     Observable<JsonElement> put(@Url String url, @FieldMap Map<String, Object> parameter, @HeaderMap Map<String, Object> header);
-
-    /**
-     * @param requestBody 用于String/JSON格式数据
-     */
-    @PUT
-    Observable<JsonElement> put(@Url String url, @Body RequestBody requestBody, @HeaderMap Map<String, Object> header);
 
 
     /**

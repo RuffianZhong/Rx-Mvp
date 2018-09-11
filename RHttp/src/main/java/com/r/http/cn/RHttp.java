@@ -14,7 +14,6 @@ import com.r.http.cn.load.upload.UploadRequestBody;
 import com.r.http.cn.observer.HttpObservable;
 import com.r.http.cn.retrofit.Method;
 import com.r.http.cn.retrofit.RetrofitUtils;
-import com.r.http.cn.utils.LogUtils;
 import com.r.http.cn.utils.RequestUtils;
 import com.trello.rxlifecycle2.LifecycleProvider;
 import com.trello.rxlifecycle2.android.ActivityEvent;
@@ -251,12 +250,6 @@ public class RHttp {
             }
         }
 
-        /*强制使用JSON时 设置 Content-Type  && Accept */
-        if (isJson) {
-            header.put("Content-Type", "application/json");
-            header.put("Accept", "application/json");
-        }
-
     }
 
     /*处理 Parameter*/
@@ -283,7 +276,8 @@ public class RHttp {
         boolean hasBodyString = !TextUtils.isEmpty(bodyString);
         RequestBody requestBody = null;
         if (hasBodyString) {
-            requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), bodyString);
+            String mediaType = isJson ? "application/json; charset=utf-8" : "text/plain;charset=utf-8";
+            requestBody = RequestBody.create(okhttp3.MediaType.parse(mediaType), bodyString);
         }
 
         /*Api接口*/
@@ -293,10 +287,7 @@ public class RHttp {
 
         switch (method) {
             case GET:
-                if (hasBodyString)
-                    apiObservable = apiService.get(disposeApiUrl(), requestBody, header);
-                else
-                    apiObservable = apiService.get(disposeApiUrl(), parameter, header);
+                apiObservable = apiService.get(disposeApiUrl(), parameter, header);
                 break;
             case POST:
                 if (hasBodyString)
@@ -305,16 +296,10 @@ public class RHttp {
                     apiObservable = apiService.post(disposeApiUrl(), parameter, header);
                 break;
             case DELETE:
-                if (hasBodyString)
-                    apiObservable = apiService.delete(disposeApiUrl(), requestBody, header);
-                else
-                    apiObservable = apiService.delete(disposeApiUrl(), parameter, header);
+                apiObservable = apiService.delete(disposeApiUrl(), parameter, header);
                 break;
             case PUT:
-                if (hasBodyString)
-                    apiObservable = apiService.put(disposeApiUrl(), requestBody, header);
-                else
-                    apiObservable = apiService.put(disposeApiUrl(), parameter, header);
+                apiObservable = apiService.put(disposeApiUrl(), parameter, header);
                 break;
         }
         return apiObservable;
