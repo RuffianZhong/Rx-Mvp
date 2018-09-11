@@ -7,6 +7,7 @@
 - 支持https
 - 支持tag取消，也可取消全部   
 - 支持链式调用
+- 支持表单格式，String，json格式数据提交请求
 
 ### 1.全局配置
 
@@ -51,6 +52,7 @@ public class RApp extends Application {
                 .setParameter(parameter)//设置参数，覆盖之前设置
                 .addHeader(header)//增加Header，重复调用可叠加
                 .setHeader(header)//设置Header，覆盖之前设置
+				.setBodyString(new Gson().toJson(user), true) //String/json格式提交数据 
                 .tag("someTag")//设置TAG 后续可根据tag取消请求
                 .lifecycle(this)//设置自动管理生命周期 Activity/Fragment 继承 RxLifecycle (不设置可能导致RxJava使用内存泄漏)
                 .activityEvent(ActivityEvent.STOP)//手动管理属于Activity (此属性前提必须设置lifecycle)
@@ -59,6 +61,8 @@ public class RApp extends Application {
 ```
 - `addParameter()`  表示添加参数，重复调用可叠加
 - `setParameter() ` 表示重置参数，清空之前设置
+- `setBodyString(String text,boolean isJson) ` 表示 `String/json` 格式提交数据，会使 `add/setParameter` 设置的参数无效；
+  `boolean isJson` 参数意义： `true` 表示json格式 ； `false` 表示String格式   
 - `baseUrl()`  基础URL，如果全局配置了，这里可以省略
 - `apiUrl()`   基础路径 如果不需要可以不设置
 - `lifecycle()` 自动管理生命周期，防止RxJava内存泄漏
