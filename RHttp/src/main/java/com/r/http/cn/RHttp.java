@@ -63,6 +63,10 @@ public class RHttp {
     private String baseUrl;
     /*apiUrl*/
     private String apiUrl;
+    /*String参数*/
+    String bodyString;
+    /*是否强制JSON格式*/
+    boolean isJson;
 
 
     /*构造函数*/
@@ -76,6 +80,9 @@ public class RHttp {
         this.fileMap = builder.fileMap;
         this.baseUrl = builder.baseUrl;
         this.apiUrl = builder.apiUrl;
+        this.isJson = builder.isJson;
+        this.bodyString = builder.bodyString;
+        this.method = builder.method;
     }
 
     /*普通Http请求*/
@@ -153,27 +160,7 @@ public class RHttp {
         disposeParameter();
 
         /*请求方式处理*/
-        Observable apiObservable;
-        if (method == null) {
-            method = Method.POST;
-        }
-        switch (method) {
-            case GET:
-                apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).get(disposeApiUrl(), parameter, header);
-                break;
-            case POST:
-                apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).post(disposeApiUrl(), parameter, header);
-                break;
-            case DELETE:
-                apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).delete(disposeApiUrl(), parameter, header);
-                break;
-            case PUT:
-                apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).put(disposeApiUrl(), parameter, header);
-                break;
-            default:
-                apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).post(disposeApiUrl(), parameter, header);
-                break;
-        }
+        Observable apiObservable = disposeApiObservable();
 
         /* 被观察者 httpObservable */
         HttpObservable httpObservable = new HttpObservable.Builder(apiObservable)
@@ -217,9 +204,9 @@ public class RHttp {
         }
 
        /*请求处理*/
-        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, uploadCallback).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
+        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
 
-               /* 被观察者 httpObservable */
+       /* 被观察者 httpObservable */
         HttpObservable httpObservable = new HttpObservable.Builder(apiObservable)
                 .httpObserver(uploadCallback)
                 .lifecycleProvider(lifecycle)
@@ -264,6 +251,12 @@ public class RHttp {
             }
         }
 
+        /*强制使用JSON时 设置 Content-Type  && Accept */
+        if (isJson) {
+            header.put("Content-Type", "application/json");
+            header.put("Accept", "application/json");
+        }
+
     }
 
     /*处理 Parameter*/
@@ -279,6 +272,52 @@ public class RHttp {
         if (baseParameter != null && baseParameter.size() > 0) {
             parameter.putAll(baseParameter);
         }
+    }
+
+    /*处理ApiObservable*/
+    private Observable disposeApiObservable() {
+
+        Observable apiObservable = null;
+
+        /*是否JSON格式提交参数*/
+        boolean hasBodyString = !TextUtils.isEmpty(bodyString);
+        RequestBody requestBody = null;
+        if (hasBodyString) {
+            requestBody = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), bodyString);
+        }
+
+        /*Api接口*/
+        Api apiService = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class);
+        /*未指定默认POST*/
+        if (method == null) method = Method.POST;
+
+        switch (method) {
+            case GET:
+                if (hasBodyString)
+                    apiObservable = apiService.get(disposeApiUrl(), requestBody, header);
+                else
+                    apiObservable = apiService.get(disposeApiUrl(), parameter, header);
+                break;
+            case POST:
+                if (hasBodyString)
+                    apiObservable = apiService.post(disposeApiUrl(), requestBody, header);
+                else
+                    apiObservable = apiService.post(disposeApiUrl(), parameter, header);
+                break;
+            case DELETE:
+                if (hasBodyString)
+                    apiObservable = apiService.delete(disposeApiUrl(), requestBody, header);
+                else
+                    apiObservable = apiService.delete(disposeApiUrl(), parameter, header);
+                break;
+            case PUT:
+                if (hasBodyString)
+                    apiObservable = apiService.put(disposeApiUrl(), requestBody, header);
+                else
+                    apiObservable = apiService.put(disposeApiUrl(), parameter, header);
+                break;
+        }
+        return apiObservable;
     }
 
     /**
@@ -422,6 +461,10 @@ public class RHttp {
         String baseUrl;
         /*apiUrl*/
         String apiUrl;
+        /*String参数*/
+        String bodyString;
+        /*是否强制JSON格式*/
+        boolean isJson;
 
         public Builder() {
         }
@@ -474,6 +517,13 @@ public class RHttp {
         /*设置 Parameter 会覆盖 Parameter 包括基础参数*/
         public RHttp.Builder setParameter(Map<String, Object> parameter) {
             this.parameter = parameter;
+            return this;
+        }
+
+        /* 设置String 类型参数  覆盖之前设置  isJson:是否强制JSON格式    bodyString设置后Parameter则无效 */
+        public RHttp.Builder setBodyString(String bodyString, boolean isJson) {
+            this.isJson = isJson;
+            this.bodyString = bodyString;
             return this;
         }
 
