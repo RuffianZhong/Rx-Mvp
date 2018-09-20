@@ -16,8 +16,9 @@ public abstract class RHttpCallback<T> extends HttpCallback<T> {
     public T onConvert(String data) {
         /**
          * 接口响应数据格式如@Response
-         * 将result转化给success
-         * 这里处理通过错误
+         * 根据业务封装:
+         * 1. response.isSuccess() (code==0) 业务逻辑成功回调convert()=>onSuccess()，否则失败回调onError()
+         * 2.统一处理接口逻辑 例如:code==101 token过期等等
          */
         T t = null;
         Response response = new Gson().fromJson(data, Response.class);
