@@ -22,9 +22,13 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
         return t;
     }
 
+
     @Override
     public void inSuccess(T value) {
-        onSuccess(parse((String) value));
+        T result = parse((String) value);
+        if (result != null) {
+            onSuccess(result);
+        }
     }
 
     @Override
