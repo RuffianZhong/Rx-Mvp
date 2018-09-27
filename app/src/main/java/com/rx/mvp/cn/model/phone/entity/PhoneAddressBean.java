@@ -1,4 +1,4 @@
-package com.rx.mvp.cn.model.other.entity;
+package com.rx.mvp.cn.model.phone.entity;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @author ZhongDaFeng
  */
 
-public class AddressBean implements Serializable {
+public class PhoneAddressBean implements Serializable {
 
 
     //  "city":"南宁市",

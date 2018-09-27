@@ -73,19 +73,6 @@ public class ActivityStackManager {
     }
 
     /**
-     * 用于异地登录或者退出时清除activity
-     */
-    public void clearActivity() {
-        while (!activityStack.isEmpty()) {
-            Activity activity = activityStack.pop();
-            /*if (activity instanceof LoginActivity) {
-            } else {
-                activity.finish();
-            }*/
-        }
-    }
-
-    /**
      * 移除
      *
      * @param activity

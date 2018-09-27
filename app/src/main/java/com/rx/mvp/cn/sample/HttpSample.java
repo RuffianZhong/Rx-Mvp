@@ -8,7 +8,7 @@ package com.rx.mvp.cn.sample;
 public class HttpSample {
 
     /**
-     * 此处不再重复示例，直接查看UserBiz   或者 OtherBiz
+     * 此处不再重复示例，直接查看UserBiz
      */
 
 }

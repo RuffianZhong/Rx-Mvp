@@ -139,7 +139,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     //compile 'com.android.support:recyclerview-v7:25.3.1'
     testCompile 'junit:junit:4.12'
-    compile project(':RHttp')
     /*view依赖注入*/
     compile 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
@@ -154,4 +153,6 @@ dependencies {
     /*图片选择*/
     compile 'com.lzy.widget:imagepicker:0.6.1'
 
+    compile project(':RHttp')
+    compile project(':Mvp')
 }

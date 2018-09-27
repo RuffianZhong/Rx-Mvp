@@ -2,27 +2,28 @@ package com.rx.mvp.cn.model.account.presenter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.rx.mvp.cn.base.BasePresenter;
+import com.r.mvp.cn.MvpPresenter;
 import com.rx.mvp.cn.core.net.http.RHttpCallback;
+import com.rx.mvp.cn.model.GlobalConstants;
 import com.rx.mvp.cn.model.account.biz.UserBiz;
 import com.rx.mvp.cn.model.account.entity.UserBean;
 import com.rx.mvp.cn.model.account.iface.ILoginView;
-import com.rx.mvp.cn.model.other.presenter.PhoneAddressPresenter;
 import com.rx.mvp.cn.utils.LogUtils;
 import com.trello.rxlifecycle2.LifecycleProvider;
 
 /**
  * 登录Presenter
+ * 备注:继承 MvpPresenter 指定 View 类型
  *
  * @author ZhongDaFeng
  */
+public class LoginPresenter extends MvpPresenter<ILoginView> {
 
-public class LoginPresenter extends BasePresenter<ILoginView, LifecycleProvider> {
+    private String ACTION_LOGIN = GlobalConstants.ACTION_LOGIN;
+    private LifecycleProvider lifecycle;
 
-    private final String TAG = PhoneAddressPresenter.class.getSimpleName();
-
-    public LoginPresenter(ILoginView view, LifecycleProvider activity) {
-        super(view, activity);
+    public LoginPresenter(LifecycleProvider activity) {
+        lifecycle = activity;
     }
 
     /**
@@ -32,9 +33,9 @@ public class LoginPresenter extends BasePresenter<ILoginView, LifecycleProvider>
      */
     public void login(String userName, String password) {
 
-        if (getView() != null)
-            getView().showLoading();
 
+        if (isViewAttached())
+            getView().mvpLoading(ACTION_LOGIN, true);
 
         RHttpCallback httpCallback = new RHttpCallback<UserBean>() {
 
@@ -45,30 +46,30 @@ public class LoginPresenter extends BasePresenter<ILoginView, LifecycleProvider>
 
             @Override
             public void onSuccess(UserBean object) {
-                if (getView() != null) {
-                    getView().closeLoading();
-                    getView().showResult(object);
+                if (isViewAttached()) {
+                    getView().mvpLoading(ACTION_LOGIN, false);
+                    getView().mvpData(ACTION_LOGIN, object);
                 }
             }
 
             @Override
             public void onError(int code, String desc) {
-                if (getView() != null) {
-                    getView().closeLoading();
-                    getView().showToast(desc);
+                if (isViewAttached()) {
+                    getView().mvpLoading(ACTION_LOGIN, false);
+                    getView().mvpError(ACTION_LOGIN, code, desc);
                 }
             }
 
             @Override
             public void onCancel() {
                 LogUtils.e("请求取消了");
-                if (getView() != null) {
-                    getView().closeLoading();
+                if (isViewAttached()) {
+                    getView().mvpLoading(ACTION_LOGIN, false);
                 }
             }
         };
 
-        new UserBiz().login(userName, password, getActivity(), httpCallback);
+        new UserBiz().login(userName, password, lifecycle, httpCallback);
 
     }
 

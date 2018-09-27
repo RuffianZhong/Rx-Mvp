@@ -19,6 +19,7 @@ import com.lzy.imagepicker.ui.ImageGridActivity;
 import com.lzy.imagepicker.view.CropImageView;
 import com.r.http.cn.RHttp;
 import com.r.http.cn.utils.LogUtils;
+import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.core.bitmap.ImageLoaderUtils;
@@ -189,6 +190,11 @@ public class UploadActivity extends BaseActivity {
                 Toast.makeText(this, "没有数据", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[0];
     }
 
     /**

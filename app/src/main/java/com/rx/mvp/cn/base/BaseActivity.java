@@ -3,10 +3,8 @@ package com.rx.mvp.cn.base;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.rx.mvp.cn.listener.LifeCycleListener;
+import com.r.mvp.cn.MvpAppCompatActivity;
 import com.rx.mvp.cn.manager.ActivityStackManager;
-import com.trello.rxlifecycle2.components.RxActivity;
-import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.util.List;
 
@@ -23,18 +21,14 @@ import pub.devrel.easypermissions.EasyPermissions;
  *
  * @author ZhongDaFeng
  */
-public abstract class BaseActivity extends RxAppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public abstract class BaseActivity extends MvpAppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
     protected Context mContext;
     protected Unbinder unBinder;
-    public LifeCycleListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (mListener != null) {
-            mListener.onCreate(savedInstanceState);
-        }
         ActivityStackManager.getManager().push(this);
         setContentView(getContentViewId());
         mContext = this;
@@ -45,58 +39,14 @@ public abstract class BaseActivity extends RxAppCompatActivity implements EasyPe
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        if (mListener != null) {
-            mListener.onStart();
-        }
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        if (mListener != null) {
-            mListener.onRestart();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mListener != null) {
-            mListener.onResume();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mListener != null) {
-            mListener.onPause();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mListener != null) {
-            mListener.onStop();
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mListener != null) {
-            mListener.onDestroy();
-        }
         //移除view绑定
         if (unBinder != null) {
             unBinder.unbind();
         }
         ActivityStackManager.getManager().remove(this);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -131,15 +81,6 @@ public abstract class BaseActivity extends RxAppCompatActivity implements EasyPe
      * 初始化Data
      */
     protected abstract void initData();
-
-    /**
-     * 设置生命周期回调函数
-     *
-     * @param listener
-     */
-    public void setOnLifeCycleListener(LifeCycleListener listener) {
-        mListener = listener;
-    }
 
 
 }

@@ -1,13 +1,16 @@
 package com.rx.mvp.cn.model.multiple;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
+import com.r.mvp.cn.root.IMvpPresenter;
 import com.ruffian.library.RVPIndicator;
 import com.rx.mvp.cn.R;
+import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.base.BaseFragmentActivity;
 import com.rx.mvp.cn.base.BasePagerAdapter;
+import com.rx.mvp.cn.model.account.fragment.LoginFragment;
+import com.rx.mvp.cn.model.phone.fragment.PhoneAddressFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +23,7 @@ import butterknife.BindView;
  *
  * @author ZhongDaFeng
  */
-public class MultipleActivity extends BaseFragmentActivity {
+public class MultipleActivity extends BaseActivity {
 
     @BindView(R.id.vp_indicator)
     RVPIndicator vpIndicator;
@@ -29,7 +32,7 @@ public class MultipleActivity extends BaseFragmentActivity {
 
     private BasePagerAdapter mPagerAdapter;
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();
-    private List<String> mList = Arrays.asList("用户登录", "号码查询");
+    private List<String> mList = Arrays.asList("综合使用", "用户登录", "号码查询");
 
     @Override
     protected int getContentViewId() {
@@ -49,6 +52,7 @@ public class MultipleActivity extends BaseFragmentActivity {
     @Override
     protected void initData() {
 
+        mFragmentList.add(new MultipleFragment());
         mFragmentList.add(new LoginFragment());
         mFragmentList.add(new PhoneAddressFragment());
         mPagerAdapter = new BasePagerAdapter(getSupportFragmentManager(), mFragmentList);
@@ -61,5 +65,10 @@ public class MultipleActivity extends BaseFragmentActivity {
 
         //设置Adapter
         viewPager.setAdapter(mPagerAdapter);
+    }
+
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[0];
     }
 }

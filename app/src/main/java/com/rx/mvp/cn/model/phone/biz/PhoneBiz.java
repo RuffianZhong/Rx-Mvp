@@ -1,4 +1,4 @@
-package com.rx.mvp.cn.model.other.biz;
+package com.rx.mvp.cn.model.phone.biz;
 
 import com.r.http.cn.RHttp;
 import com.r.http.cn.callback.HttpCallback;
@@ -12,7 +12,7 @@ import java.util.TreeMap;
  *
  * @author ZhongDaFeng
  */
-public class OtherBiz extends BaseBiz {
+public class PhoneBiz extends BaseBiz {
 
     /**
      * 号码归属地查询API

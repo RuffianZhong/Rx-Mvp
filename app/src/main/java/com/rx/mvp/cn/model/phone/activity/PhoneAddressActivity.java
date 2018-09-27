@@ -1,4 +1,4 @@
-package com.rx.mvp.cn.model.other.activity;
+package com.rx.mvp.cn.model.phone.activity;
 
 import android.text.TextUtils;
 import android.view.View;
@@ -6,12 +6,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.r.mvp.cn.MvpView;
+import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
-import com.rx.mvp.cn.model.other.entity.AddressBean;
-import com.rx.mvp.cn.model.other.presenter.PhoneAddressPresenter;
+import com.rx.mvp.cn.model.phone.entity.PhoneAddressBean;
+import com.rx.mvp.cn.model.phone.presenter.PhoneAddressPresenter;
 import com.rx.mvp.cn.utils.ToastUtils;
-import com.rx.mvp.cn.model.other.iface.IPhoneAddressView;
 import com.rx.mvp.cn.widget.RLoadingDialog;
 
 import butterknife.BindView;
@@ -22,8 +23,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-
-public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressView {
+public class PhoneAddressActivity extends BaseActivity implements MvpView {
 
 
     @BindView(R.id.et_phone)
@@ -37,7 +37,7 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
     @BindView(R.id.tv_operator)
     TextView tvOperator;
 
-    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this, this);
+    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this);
     private RLoadingDialog mLoadingDialog;
 
     @Override
@@ -59,7 +59,6 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
     protected void initData() {
 
     }
-
 
     @OnClick({R.id.submit})
     public void onClick(View v) {
@@ -84,11 +83,30 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
 
     }
 
+
     @Override
-    public void showResult(AddressBean bean) {
-        if (bean == null) {
-            return;
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[]{mPhonePst};
+    }
+
+    public void showToast(String msg) {
+        ToastUtils.showToast(mContext, msg);
+    }
+
+    @Override
+    public void mvpLoading(String action, boolean show) {
+        if (show) {
+            mLoadingDialog.show();
+        } else {
+            mLoadingDialog.dismiss();
         }
+    }
+
+    @Override
+    public <M> void mvpData(String action, M data) {
+        if (data == null) return;
+        PhoneAddressBean bean = (PhoneAddressBean) data;
+
         tvPhone.setText(bean.getMobileNumber());
         tvCity.setText(bean.getCity());
         tvProvince.setText(bean.getProvince());
@@ -96,17 +114,8 @@ public class PhoneAddressActivity extends BaseActivity implements IPhoneAddressV
     }
 
     @Override
-    public void showLoading() {
-        mLoadingDialog.show();
+    public void mvpError(String action, int code, String msg) {
+        showToast(msg);
     }
 
-    @Override
-    public void closeLoading() {
-        mLoadingDialog.dismiss();
-    }
-
-    @Override
-    public void showToast(String msg) {
-        ToastUtils.showToast(mContext, msg);
-    }
 }

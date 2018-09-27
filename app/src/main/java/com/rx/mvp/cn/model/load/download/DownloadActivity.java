@@ -9,6 +9,7 @@ import android.widget.ListView;
 import com.r.http.cn.RDownLoad;
 import com.r.http.cn.load.download.DownloadCallback;
 import com.r.http.cn.model.Download;
+import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.core.bitmap.ImageLoaderUtils;
@@ -59,6 +60,11 @@ public class DownloadActivity extends BaseActivity {
     private void reStartDownload(DownloadBean bean) {
         RDownLoad.get().removeDownload(bean, true);//移除下载
         RDownLoad.get().startDownload(bean);//开始下载
+    }
+
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[0];
     }
 
     /**

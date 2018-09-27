@@ -4,20 +4,17 @@ import android.Manifest;
 import android.content.Intent;
 import android.view.View;
 
-import com.google.gson.Gson;
-import com.r.http.cn.RHttp;
-import com.r.http.cn.callback.HttpCallback;
+import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.model.account.activity.LoginActivity;
 import com.rx.mvp.cn.model.load.download.DownloadActivity;
 import com.rx.mvp.cn.model.load.upload.UploadActivity;
 import com.rx.mvp.cn.model.multiple.MultipleActivity;
-import com.rx.mvp.cn.model.other.activity.PhoneAddressActivity;
+import com.rx.mvp.cn.model.phone.activity.PhoneAddressActivity;
 import com.rx.mvp.cn.utils.LogUtils;
 
 import java.util.List;
-import java.util.TreeMap;
 
 import butterknife.OnClick;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -83,6 +80,11 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
         LogUtils.e("申请权限失败");
+    }
+
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[0];
     }
 }
 

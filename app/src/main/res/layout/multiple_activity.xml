@@ -13,7 +13,7 @@
         android:background="@color/colorPrimary"
         app:indicator_color="@android:color/white"
         app:indicator_style="triangle"
-        app:indicator_visible_count="2"
+        app:indicator_visible_count="3"
         app:indicator_width="16dp"
         app:text_color_normal="#bebdbd"
         app:text_color_selected="#ffffff" />

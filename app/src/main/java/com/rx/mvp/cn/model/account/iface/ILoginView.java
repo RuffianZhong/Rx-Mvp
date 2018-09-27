@@ -1,17 +1,20 @@
 package com.rx.mvp.cn.model.account.iface;
 
-import com.rx.mvp.cn.base.IBaseView;
-import com.rx.mvp.cn.model.account.entity.UserBean;
+import com.r.mvp.cn.MvpView;
 
 /**
  * 登录view
+ * 备注: MvpView 未能满足需求时新增方法
  *
  * @author ZhongDaFeng
  */
+public interface ILoginView extends MvpView {
 
-public interface ILoginView extends IBaseView {
-
-    //显示结果
-    void showResult(UserBean bean);
+    /**
+     * 额外方法显示吐司
+     *
+     * @param msg
+     */
+    void showToast(String msg);
 
 }
