@@ -76,133 +76,290 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
 
 > MVP 是 MVC 框架的升级版本，通过 Presenter 桥梁连接 View 和 Model，使得模块之间更好的解耦
 
-#### 定义BasePresenter<V, T>
+#### MvpPresenter<V extends IMvpView>
 
 ```
 
-public class BasePresenter<V, T> {
+/**
+ * MVP  根Presenter
+ */
+public interface IMvpPresenter<V extends IMvpView> {
 
-    protected Reference<V> mViewRef;
-    protected V mView;
-    protected Reference<T> mActivityRef;
-    protected T mActivity;
+    /**
+     * 将 View 添加到当前 Presenter
+     */
+    @UiThread
+    void attachView(@NonNull V view);
+
+    /**
+     * 将 View 从 Presenter 移除
+     */
+    @UiThread
+    void detachView();
+
+    /**
+     * 销毁 V 实例
+     */
+    @UiThread
+    void destroy();
+
+}
 
 
-    public BasePresenter(V view, T activity) {
-        attachView(view);
-        attachActivity(activity);
-        setListener(activity);
-    }
+/**
+ * MvpPresenter
+ */
+public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
 
-   
-	/*关联*/	
-    private void attachView(V view) {
-        mViewRef = new WeakReference<V>(view);
-        mView = mViewRef.get();
-    }
+    /*View弱引用*/
+    private WeakReference<V> viewRef;
 
-	/*关联*/	
-    private void attachActivity(T activity) {
-        mActivityRef = new WeakReference<T>(activity);
-        mActivity = mActivityRef.get();
-    }
-
-    /*解绑*/	
-    private void detachView() {
-        if (isViewAttached()) {
-            mViewRef.clear();
-            mViewRef = null;
-        }
-    }
-    
-	/*解绑*/	
-    private void detachActivity() {
-        if (isActivityAttached()) {
-            mActivityRef.clear();
-            mActivityRef = null;
-        }
-    }
-
+    /**
+     * 获取view
+     *
+     * @return
+     */
+    @UiThread
     public V getView() {
-        if (mViewRef == null) {
-            return null;
-        }
-        return mViewRef.get();
+        return viewRef == null ? null : viewRef.get();
     }
 
-    public T getActivity() {
-        if (mActivityRef == null) {
-            return null;
-        }
-        return mActivityRef.get();
+    /**
+     * 判断View是否已经添加
+     *
+     * @return
+     */
+    @UiThread
+    public boolean isViewAttached() {
+        return viewRef != null && viewRef.get() != null;
     }
+
+    /**
+     * 绑定View
+     *
+     * @param view
+     */
+    @UiThread
+    @Override
+    public void attachView(V view) {
+        viewRef = new WeakReference<V>(view);
+    }
+
+    /**
+     * 移除View
+     */
+    @Override
+    public void detachView() {
+        if (viewRef != null) {
+            viewRef.clear();
+            viewRef = null;
+        }
+    }
+
+    @Override
+    public void destroy() {
+    }
+
 }
 
 ```
 
-**XXXPresenter**
+#### Presenter使用
 
 ```
-    class LoginPresenter extends BasePresenter<ILoginView, LifecycleProvider> {
+	class LoginPresenter extends MvpPresenter<ILoginView> {
 
-        public LoginPresenter(ILoginView view, LifecycleProvider activity) {
-            super(view, activity);
-        }
+	 /*登录逻辑*/
+     public void login() {
+		//loading	
+		getView().mvpLoading(ACTION_LOGIN, true);
 
-		/*登录逻辑*/
-        public void login(){
-            new RHttp.Builder()
-                    .post()
-                    .apiUrl("user/login")
-                    .addParameter(parameterMap)
-                    .lifecycle(getActivity())
-                    .build()
-                    .request(new HttpCallback<UserBean>(){});
-        }
+        new RHttp.Builder()
+                .post()
+                .apiUrl("user/login")
+                .addParameter(parameterMap)
+                .lifecycle(getActivity())
+                .build()
+                .request(new RHttpCallback<UserBean>() {
+                    @Override
+                    public UserBean convert(JsonElement data) {
+                        return new Gson().fromJson(data, UserBean.class);
+                    }
 
+                    @Override
+                    public void onSuccess(UserBean object) {
+                        if (isViewAttached()) {
+                            getView().mvpLoading(ACTION_LOGIN, false);
+                            getView().mvpData(ACTION_LOGIN, object);
+                        }
+                    }
+
+                    @Override
+                    public void onError(int code, String desc) {
+                        if (isViewAttached()) {
+                            getView().mvpLoading(ACTION_LOGIN, false);
+                            getView().mvpError(ACTION_LOGIN, code, desc);
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        if (isViewAttached()) {
+                            getView().mvpLoading(ACTION_LOGIN, false);
+                        }
+                    }
+                });
+    }
     }
 ```
 
 
-#### 定义View接口 
+#### MvpView
 ```
-	public interface ILoginView {
 
-	    //显示结果
-	    void showResult(UserBean bean);
+/**
+ * IMvpView
+ */
+public interface IMvpView {
+}
 
-	}
+
+/**
+ * 基础View接口
+ * 备注:loading/data/error
+ * 1. lde 思想: 页面通用  加载中/展示数据/错误处理
+ * 2. action 方式: 考虑多个请求时 根据 action 区分处理
+ */
+public interface MvpView extends IMvpView {
+
+    /**
+     * mvp 加载中
+     *
+     * @param action 区分不同事件
+     * @param show   开启/关闭 true:开启
+     */
+    @UiThread
+    void mvpLoading(String action, boolean show);
+
+    /**
+     * mvp 展示数据
+     *
+     * @param action 区分不同事件
+     * @param data   数据
+     * @param <M>
+     */
+    @UiThread
+    <M> void mvpData(String action, M data);
+
+    /**
+     * mvp 错误处理
+     *
+     * @param action 区分不同事件
+     * @param code   错误码
+     * @param msg    错误信息
+     */
+    @UiThread
+    void mvpError(String action, int code, String msg);
+
+}
+
+
+/**
+ * 登录view
+ * 备注: MvpView 未能满足需求时新增方法
+ */
+public interface ILoginView extends MvpView {
+
+    /**
+     * 额外方法显示吐司
+     *
+     * @param msg
+     */
+    void showToast(String msg);
+
+}
 ```
+
+#### MvpActivity/MvpFragment
+
+```
+public abstract class MvpActivity<V extends IMvpView, P extends IMvpPresenter<V>> extends RxActivity
+ implements IMvpView, MvpDelegateCallback<V, P> {
+
+    /**
+     * 获取 Presenter 数组
+     */
+    protected abstract P[] getPresenterArray();
+}
+
+```
+
+```
+ P[] getPresenterArray() 返回 Presenter 数组，可用于一个Activity 对应多个 Presenter 问题
+```
+
 #### Activity使用
 
 ```
-    class XActivity extends RxActivity implements ILoginView{
+    class XActivity extends MvpActivity implements ILoginView, IPhoneAddressView {
+		
         //登录Presenter
-        LoginPresenter loginPresenter = new LoginPresenter(this, this);
+        LoginPresenter loginPresenter = new LoginPresenter(this);
+		//获取号码归属地	
+    	PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this);
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             loginPresenter.login();
+			mPhonePst.query();
         }
 
         @Override
-        public void showResult(UserBean bean) {
-            //update ui
-        }
+	    protected IMvpPresenter[] getPresenterArray() {
+	        return new IMvpPresenter[]{mLoginPresenter, mPhonePst};
+	    }
+	
+	    @Override
+	    public void showToast(String msg) {
+	        ToastUtils.showToast(mContext, msg);
+	    }
+	
+	    @Override
+	    public void mvpLoading(String action, boolean show) {
+	        /**
+	         * 区分action  只有action是登录业务时才需要loading  （根据开发者具体业务需求实现）
+	         */
+	        if (GlobalConstants.ACTION_LOGIN.equals(action)) {
+	            if (show) {
+	                mLoadingDialog.show();
+	            } else {
+	                mLoadingDialog.dismiss();
+	            }
+	        }
+	    }
+	
+	    @Override
+	    public <M> void mvpData(String action, M data) {
+	        if (GlobalConstants.ACTION_LOGIN.equals(action)) {//登录返回数据
+	            UserBean bean = (UserBean) data;
+	            setupUserInfo(bean);
+	        } else if (GlobalConstants.ACTION_QUERY_PHONE.equals(action)) {//号码查询返回数据
+	            PhoneAddressBean bean = (PhoneAddressBean) data;
+	            setupPhoneInfo(bean);
+	        }
+	    }
+	
+	    @Override
+	    public void mvpError(String action, int code, String msg) {
+	        /**
+	         * 具体业务具体分析，这里不需要根据action或者code做特殊处理，因此一并吐司提示
+	         */
+	        showToast(msg);
+	    }
     }
 ```
 
-```
-
-1. 有部分开发者可能会认为把 `UserBean` 实体传递给 `View(activity/fragment)` 还是会出现 `model` 跟 `view` 的耦合
-
-2. 个人认为，不一定死脑筋非要完全解耦才是实现了 `MVP` 的模式，这里已经实现不关心 `UserBean` 的来源和构建就行了
-
-3. 如果非要完全解耦也是可以的，将 UserBean 拆解成"基本数据类型" 
-  `void showResult(String userName,int userId....)` 要用几个参数就定义几个参数，但是感觉太麻烦了
-
-```
 
 ```
    /**
@@ -211,12 +368,11 @@ public class BasePresenter<V, T> {
      * 强烈建议阅读代码，在此基础上改造成适用自己项目的框架
      *
      * 欢迎提供建议/意见，不断完善框架
+     *
+     * 喜欢就start吧，收获知识激励别人
      */
 
 ```
-
-> 原始构造想法参考博客
-> **CSDN博客地址：http://blog.csdn.net/u014702653/article/details/75268919**
 
 
 ## License
