@@ -47,7 +47,7 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
      * @param data
      * @return
      */
-    public abstract T onConvert(String data);
+    public abstract T onConvert(String data) throws Exception;
 
     /**
      * 成功回调

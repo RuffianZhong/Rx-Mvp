@@ -7,5 +7,5 @@ package com.r.http.cn.helper;
  */
 public interface ParseHelper<T> {
     /*解析数据*/
-    T parse(String data) throws Exception;
+    T parse(String data);
 }
