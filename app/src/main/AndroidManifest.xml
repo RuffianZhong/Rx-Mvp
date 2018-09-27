@@ -29,7 +29,7 @@
             android:name=".model.account.activity.LoginActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".model.other.activity.PhoneAddressActivity"
+            android:name=".model.phone.activity.PhoneAddressActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".model.multiple.MultipleActivity"
