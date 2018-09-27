@@ -17,6 +17,7 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
         try {
             t = onConvert(data);
         } catch (Exception e) {
+            e.printStackTrace();
             onError(ExceptionEngine.ANALYTIC_CLIENT_DATA_ERROR, "解析数据出错");
         }
         return t;
