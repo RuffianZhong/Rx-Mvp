@@ -10,13 +10,19 @@ import com.r.http.cn.helper.ParseHelper;
  */
 public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHelper<T> {
 
+    /**
+     * 是否回调成功函数
+     */
+    private boolean callSuccess = true;
 
     @Override
     public T parse(String data) {
         T t = null;
         try {
             t = onConvert(data);
+            callSuccess = true;
         } catch (Exception e) {
+            callSuccess = false;
             e.printStackTrace();
             onError(ExceptionEngine.ANALYTIC_CLIENT_DATA_ERROR, "解析数据出错");
         }
@@ -27,7 +33,7 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
     @Override
     public void inSuccess(T value) {
         T result = parse((String) value);
-        if (result != null) {
+        if (callSuccess) {
             onSuccess(result);
         }
     }
