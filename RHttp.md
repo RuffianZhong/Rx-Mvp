@@ -54,6 +54,8 @@ public class RApp extends Application {
                 .setHeader(header)//设置Header，覆盖之前设置
 				.setBodyString(new Gson().toJson(user), true) //String/json格式提交数据 
                 .tag("someTag")//设置TAG 后续可根据tag取消请求
+				.file(fileMap)//map方式设置file文件
+                .file("key", list)//一个key对应多个文件
                 .lifecycle(this)//设置自动管理生命周期 Activity/Fragment 继承 RxLifecycle (不设置可能导致RxJava使用内存泄漏)
                 .activityEvent(ActivityEvent.STOP)//手动管理属于Activity (此属性前提必须设置lifecycle)
                 .fragmentEvent(FragmentEvent.DESTROY_VIEW)//手动管理属于Fragment (此属性前提必须设置lifecycle)
@@ -68,7 +70,8 @@ public class RApp extends Application {
 - `lifecycle()` 自动管理生命周期，防止RxJava内存泄漏
 - `activityEvent()` 适用于Activity的指定生命周期管理  依赖于 `lifecycle` 已经设置
 - `fragmentEvent()` 适用于Fragment的指定生命周期管理  依赖于 `lifecycle` 已经设置
-
+- `file(Map fileMap)` 上传文件时，文件map
+- `file(String key,List<File> list)` 上传文件时，文件list 适用一个key对应多个文件
 
 ##### 2.2 发起请求/上传文件/取消请求/取消全部
 ```
