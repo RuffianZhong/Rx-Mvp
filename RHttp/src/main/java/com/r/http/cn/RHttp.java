@@ -21,6 +21,7 @@ import com.trello.rxlifecycle2.android.FragmentEvent;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -551,6 +552,19 @@ public class RHttp {
         /*文件集合*/
         public RHttp.Builder file(Map<String, File> file) {
             this.fileMap = file;
+            return this;
+        }
+
+        /*一个Key对应多个文件*/
+        public RHttp.Builder file(String key, List<File> fileList) {
+            if (fileMap == null) {
+                fileMap = new IdentityHashMap();
+            }
+            if (fileList != null && fileList.size() > 0) {
+                for (File file : fileList) {
+                    fileMap.put(new String(key), file);
+                }
+            }
             return this;
         }
 
