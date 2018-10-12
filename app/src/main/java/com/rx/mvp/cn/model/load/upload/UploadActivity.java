@@ -28,6 +28,7 @@ import com.rx.mvp.cn.core.net.http.RUploadCallback;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -95,7 +96,7 @@ public class UploadActivity extends BaseActivity {
      *
      * @param fileMap
      */
-    private void upload(Map<String, File> fileMap) {
+    private void upload(Map<String, File> fileMap, List<File> list) {
 
         //基本参数
         TreeMap<String, Object> parameter = new TreeMap<>();
@@ -126,6 +127,7 @@ public class UploadActivity extends BaseActivity {
                 .addParameter(parameter)
                 .addHeader(header)
                 .file(fileMap)
+                // .file("key", list)
                 .lifecycle(this)
                 .build()
                 .upload(new RUploadCallback<String>() {
@@ -170,19 +172,22 @@ public class UploadActivity extends BaseActivity {
                  * 获取选择图片之后上传
                  */
                 File file;
-               Map<String, File> fileMap = new TreeMap<>();// IdentityHashMap 一个key多个文件
+                Map<String, File> fileMap = new IdentityHashMap<>();// IdentityHashMap 一个key多个文件
                 String key;
                 String path;
+                List<File> list = new ArrayList<>();
                 for (int i = 0; i < images.size(); i++) {
                     key = images.get(i).name;
                     path = images.get(i).path;
                     file = new File(path);
+                    //fileMap.put(new String("key"), file);//一个key对应多个文件上传 IdentityHashMap  关键是对象 new String("key")
                     fileMap.put(key, file);
+                    list.add(file);
                 }
                 try {
                     Thread.sleep(500);//延时0.5秒看效果
                     //上传图片
-                    upload(fileMap);
+                    upload(fileMap, list);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
