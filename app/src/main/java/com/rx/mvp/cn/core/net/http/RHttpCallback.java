@@ -12,6 +12,8 @@ import com.rx.mvp.cn.model.Response;
  */
 public abstract class RHttpCallback<T> extends HttpCallback<T> {
 
+    private Response response;
+
     @Override
     public T onConvert(String data) {
         /**
@@ -21,7 +23,7 @@ public abstract class RHttpCallback<T> extends HttpCallback<T> {
          * 2.统一处理接口逻辑 例如:code==101 token过期等等
          */
         T t = null;
-        Response response = new Gson().fromJson(data, Response.class);
+        response = new Gson().fromJson(data, Response.class);
         int code = response.getCode();
         String msg = response.getMsg();
         JsonElement result = response.getResult();
@@ -68,4 +70,16 @@ public abstract class RHttpCallback<T> extends HttpCallback<T> {
      * 取消回调
      */
     public abstract void onCancel();
+
+    /**
+     * 业务逻辑是否成功
+     *
+     * @return
+     */
+    @Override
+    public boolean isBusinessOk() {
+        return response.isSuccess();
+    }
+
+
 }

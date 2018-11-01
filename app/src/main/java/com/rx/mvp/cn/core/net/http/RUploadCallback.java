@@ -14,6 +14,8 @@ import java.io.File;
  */
 public abstract class RUploadCallback<T> extends UploadCallback<T> {
 
+    private Response response;
+
     @Override
     public T onConvert(String data) {
         /**
@@ -22,7 +24,7 @@ public abstract class RUploadCallback<T> extends UploadCallback<T> {
          * 这里处理通过错误
          */
         T t = null;
-        Response response = new Gson().fromJson(data, Response.class);
+        response = new Gson().fromJson(data, Response.class);
         int code = response.getCode();
         String msg = response.getMsg();
         switch (code) {
@@ -82,4 +84,13 @@ public abstract class RUploadCallback<T> extends UploadCallback<T> {
      */
     public abstract void onCancel();
 
+    /**
+     * 业务逻辑是否成功
+     *
+     * @return
+     */
+    @Override
+    public boolean isBusinessOk() {
+        return response.isSuccess();
+    }
 }
