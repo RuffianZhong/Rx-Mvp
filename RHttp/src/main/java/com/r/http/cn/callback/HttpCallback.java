@@ -33,7 +33,7 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
     @Override
     public void inSuccess(T value) {
         T result = parse((String) value);
-        if (callSuccess) {
+        if (callSuccess && isBusinessOk()) {
             onSuccess(result);
         }
     }
@@ -76,5 +76,11 @@ public abstract class HttpCallback<T> extends BaseCallback<T> implements ParseHe
      */
     public abstract void onCancel();
 
+    /**
+     * 业务逻辑是否成功
+     *
+     * @return
+     */
+    public abstract boolean isBusinessOk();
 
 }
