@@ -204,7 +204,7 @@ public class RHttp {
         }
 
        /*请求处理*/
-        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
+        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl()).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
 
        /* 被观察者 httpObservable */
         HttpObservable httpObservable = new HttpObservable.Builder(apiObservable)
@@ -282,7 +282,7 @@ public class RHttp {
         }
 
         /*Api接口*/
-        Api apiService = RetrofitUtils.get().getRetrofit(getBaseUrl(), header, httpCallback).create(Api.class);
+        Api apiService = RetrofitUtils.get().getRetrofit(getBaseUrl()).create(Api.class);
         /*未指定默认POST*/
         if (method == null) method = Method.POST;
 
@@ -515,7 +515,10 @@ public class RHttp {
 
         /* 增加 Header 不断叠加 Header 包括基础 Header */
         public RHttp.Builder addHeader(Map<String, Object> header) {
-            this.header = header;
+            if (this.header == null) {
+                this.header = new TreeMap<>();
+            }
+            this.header.putAll(header);
             return this;
         }
 

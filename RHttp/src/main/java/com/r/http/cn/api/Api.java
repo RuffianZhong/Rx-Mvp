@@ -108,14 +108,15 @@ public interface Api {
     /**
      * 断点续传下载
      *
-     * @param range 断点下载范围 bytes= start - end
-     * @param url   下载地址
+     * @param range  断点下载范围 bytes= start - end
+     * @param url    下载地址
+     * @param header 请求头map
      * @return
      * @Streaming 防止内容写入内存, 大文件通过此注解避免OOM
      */
     @Streaming
     @GET
-    Observable<ResponseBody> download(@Header("RANGE") String range, @Url String url);
+    Observable<ResponseBody> download(@Header("RANGE") String range, @Url String url, @HeaderMap Map<String, Object> header);
 
 
 }

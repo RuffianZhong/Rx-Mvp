@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -108,8 +109,12 @@ public class RDownLoad {
             downloadSet.add(download);
 
         }
+
+        /*下载时添加 headerMap 暂时只获取 baseHeader 可扩展 startDownload() 参数形式，或者添加 Download 属性 记得添加到 headerMap*/
+        Map<String, Object> headerMap = RHttp.Configure.get().getBaseHeader();
+
         /* RANGE 断点续传下载 */
-        api.download("bytes=" + download.getCurrentSize() + "-", download.getServerUrl())
+        api.download("bytes=" + download.getCurrentSize() + "-", download.getServerUrl(), headerMap)
                 .subscribeOn(Schedulers.io())
                 .map(new Function<ResponseBody, Object>() {//数据变换
                          @Override
