@@ -69,7 +69,20 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
 
     @Override
     public void onCreate(Bundle saved) {
-
+        P[] pArray = delegateCallback.getPresenter();
+        if (pArray != null) {
+            V[] vArray = delegateCallback.getMvpView();
+            P p;
+            V v;
+            for (int i = 0; i < pArray.length; i++) {
+                p = pArray[i];
+                v = vArray[i];
+                if (p != null && v != null) {
+                    //关联view
+                    p.attachView(v);
+                }
+            }
+        }
     }
 
     @Override
@@ -92,21 +105,6 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            V[] vArray = delegateCallback.getMvpView();
-            P p;
-            V v;
-            for (int i = 0; i < pArray.length; i++) {
-                p = pArray[i];
-                v = vArray[i];
-                if (p != null && v != null) {
-                    //关联view
-                    p.attachView(v);
-                }
-            }
-        }
     }
 
     @Override
