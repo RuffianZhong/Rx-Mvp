@@ -1,15 +1,13 @@
 package com.rx.mvp.cn.model.account.presenter;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import android.util.Log;
+
 import com.r.mvp.cn.MvpPresenter;
-import com.rx.mvp.cn.core.net.http.RHttpCallback;
-import com.rx.mvp.cn.model.GlobalConstants;
-import com.rx.mvp.cn.model.account.biz.UserBiz;
+import com.r.mvp.cn.model.ModelCallback;
+import com.r.mvp.cn.model.ModelFactory;
+import com.rx.mvp.cn.model.account.contract.AccountContract;
 import com.rx.mvp.cn.model.account.entity.UserBean;
-import com.rx.mvp.cn.model.account.iface.ILoginView;
-import com.rx.mvp.cn.utils.LogUtils;
-import com.trello.rxlifecycle2.LifecycleProvider;
+import com.rx.mvp.cn.model.account.model.AccountModel;
 
 /**
  * 登录Presenter
@@ -17,60 +15,88 @@ import com.trello.rxlifecycle2.LifecycleProvider;
  *
  * @author ZhongDaFeng
  */
-public class LoginPresenter extends MvpPresenter<ILoginView> {
-
-    private String ACTION_LOGIN = GlobalConstants.ACTION_LOGIN;
-    private LifecycleProvider lifecycle;
-
-    public LoginPresenter(LifecycleProvider activity) {
-        lifecycle = activity;
-    }
+public class LoginPresenter extends MvpPresenter<AccountContract.ILoginView> {
 
     /**
      * 登录
-     *
-     * @author ZhongDaFeng
      */
     public void login(String userName, String password) {
 
+        Log.e("tag", "============" + (getView() == null));
+        //显示loading框
+        getView().showProgressView();
 
-        if (isViewAttached())
-            getView().mvpLoading(ACTION_LOGIN, true);
-
-        RHttpCallback httpCallback = new RHttpCallback<UserBean>() {
-
+        //调用model获取网络数据
+        ModelFactory.getModel(AccountModel.class).login(getView().getActivity(), userName, password, getView().getRxLifecycle(), new ModelCallback.Http<UserBean>() {
             @Override
-            public UserBean convert(JsonElement data) {
-                return new Gson().fromJson(data, UserBean.class);
-            }
+            public void onSuccess(UserBean data) {
+                //model数据回传
 
-            @Override
-            public void onSuccess(UserBean object) {
-                if (isViewAttached()) {
-                    getView().mvpLoading(ACTION_LOGIN, false);
-                    getView().mvpData(ACTION_LOGIN, object);
-                }
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                StringBuffer sb = new StringBuffer();
+                sb.append("登录成功")
+                        .append("\n")
+                        .append("用户ID:")
+                        .append(data.getUid())
+                        .append("\n")
+                        .append("Token:")
+                        .append("\n")
+                        .append(data.getToken())
+                        .append("\n")
+                        .append("最后登录:")
+                        .append("\n")
+                        .append(data.getTime());
+
+                //用户信息展示
+                getView().showResult(sb.toString());
+
             }
 
             @Override
             public void onError(int code, String desc) {
-                if (isViewAttached()) {
-                    getView().mvpLoading(ACTION_LOGIN, false);
-                    getView().mvpError(ACTION_LOGIN, code, desc);
-                }
+                //model数据回传
+
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                //错误信息提示
+                getView().showError(code, desc);
             }
 
             @Override
             public void onCancel() {
-                LogUtils.e("请求取消了");
-                if (isViewAttached()) {
-                    getView().mvpLoading(ACTION_LOGIN, false);
-                }
+                //关闭弹窗
+                getView().dismissProgressView();
             }
-        };
-
-        new UserBiz().login(userName, password, lifecycle, httpCallback);
+        });
 
     }
 
+    /**
+     * 获取本地缓存数据
+     */
+    public void getLocalCache() {
+
+        //调用model获取本地数据
+        ModelFactory.getModel(AccountModel.class).getLocalCache(getView().getActivity(), getView().getRxLifecycle(), new ModelCallback.Data<String>() {
+            @Override
+            public void onSuccess(String object) {
+                //model数据回传
+
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                //用户信息展示
+                getView().showResult(object);
+
+            }
+        });
+    }
+
+    @Override
+    public void destroy() {
+
+    }
 }

@@ -17,6 +17,7 @@ public class UserBean implements Serializable {
     private String token;
     @SerializedName("uid")
     private String uid;
+    private String time;
 
     public String getToken() {
         return token;
@@ -32,5 +33,13 @@ public class UserBean implements Serializable {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getTime() {
+        return time == null ? "" : time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

@@ -4,15 +4,16 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseFragment;
-import com.rx.mvp.cn.model.account.entity.UserBean;
-import com.rx.mvp.cn.model.account.iface.ILoginView;
+import com.rx.mvp.cn.model.account.contract.AccountContract;
 import com.rx.mvp.cn.model.account.presenter.LoginPresenter;
 import com.rx.mvp.cn.utils.ToastUtils;
 import com.rx.mvp.cn.widget.RLoadingDialog;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -22,16 +23,16 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class LoginFragment extends BaseFragment implements ILoginView {
+public class LoginFragment extends BaseFragment implements AccountContract.ILoginView {
 
     @BindView(R.id.et_user_name)
     EditText etUserName;
     @BindView(R.id.et_password)
     EditText etPassword;
+    @BindView(R.id.tv_result)
+    TextView tvResult;
 
-    private LoginPresenter mLoginPresenter = new LoginPresenter(this);
-
-    private RLoadingDialog mLoadingDialog;
+    private LoginPresenter mLoginPresenter = new LoginPresenter();
 
     @Override
     protected View getContentView() {
@@ -50,7 +51,8 @@ public class LoginFragment extends BaseFragment implements ILoginView {
 
     @Override
     protected void initData() {
-
+        //获取缓存数据
+        mLoginPresenter.getLocalCache();
     }
 
     @OnClick({R.id.login})
@@ -62,7 +64,7 @@ public class LoginFragment extends BaseFragment implements ILoginView {
                 if (TextUtils.isEmpty(userName) || TextUtils.isEmpty(password)) {
                     return;
                 }
-                mLoginPresenter.login(userName, password);
+                mLoginPresenter.login( userName, password);
                 break;
         }
     }
@@ -73,28 +75,17 @@ public class LoginFragment extends BaseFragment implements ILoginView {
     }
 
     @Override
-    public void showToast(String msg) {
-        ToastUtils.showToast(mContext, msg);
+    public LifecycleProvider getRxLifecycle() {
+        return this;
     }
 
     @Override
-    public void mvpLoading(String action, boolean show) {
-        if (show) {
-            mLoadingDialog.show();
-        } else {
-            mLoadingDialog.dismiss();
-        }
+    public void showResult(String data) {
+        tvResult.setText(data);
     }
 
     @Override
-    public <M> void mvpData(String action, M data) {
-        if (data == null) return;
-        UserBean bean = (UserBean) data;
-        showToast(bean.getUid());
-    }
-
-    @Override
-    public void mvpError(String action, int code, String msg) {
+    public void showError(int code, String msg) {
         showToast(msg);
     }
 }

@@ -3,11 +3,9 @@ package com.rx.mvp.cn.model.multiple;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 
-import com.r.mvp.cn.root.IMvpPresenter;
 import com.ruffian.library.RVPIndicator;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
-import com.rx.mvp.cn.base.BaseFragmentActivity;
 import com.rx.mvp.cn.base.BasePagerAdapter;
 import com.rx.mvp.cn.model.account.fragment.LoginFragment;
 import com.rx.mvp.cn.model.phone.fragment.PhoneAddressFragment;
@@ -67,8 +65,4 @@ public class MultipleActivity extends BaseActivity {
         viewPager.setAdapter(mPagerAdapter);
     }
 
-    @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
-    }
 }

@@ -10,11 +10,11 @@ import android.widget.Toast;
 import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseFragment;
+import com.rx.mvp.cn.model.phone.contract.PhoneContract;
 import com.rx.mvp.cn.model.phone.entity.PhoneAddressBean;
-import com.rx.mvp.cn.model.phone.iface.IPhoneAddressView;
 import com.rx.mvp.cn.model.phone.presenter.PhoneAddressPresenter;
-import com.rx.mvp.cn.utils.ToastUtils;
 import com.rx.mvp.cn.widget.RLoadingDialog;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -24,7 +24,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class PhoneAddressFragment extends BaseFragment implements IPhoneAddressView {
+public class PhoneAddressFragment extends BaseFragment implements PhoneContract.IPhoneView {
 
     @BindView(R.id.et_phone)
     EditText etPhone;
@@ -37,8 +37,7 @@ public class PhoneAddressFragment extends BaseFragment implements IPhoneAddressV
     @BindView(R.id.tv_operator)
     TextView tvOperator;
 
-    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this);
-    private RLoadingDialog mLoadingDialog;
+    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter();
 
     @Override
     protected View getContentView() {
@@ -86,32 +85,17 @@ public class PhoneAddressFragment extends BaseFragment implements IPhoneAddressV
         return new IMvpPresenter[]{mPhonePst};
     }
 
-    public void showToast(String msg) {
-        ToastUtils.showToast(mContext, msg);
+    @Override
+    public LifecycleProvider getRxLifecycle() {
+        return this;
     }
 
     @Override
-    public void mvpLoading(String action, boolean show) {
-        if (show) {
-            mLoadingDialog.show();
-        } else {
-            mLoadingDialog.dismiss();
-        }
-    }
-
-    @Override
-    public <M> void mvpData(String action, M data) {
-        if (data == null) return;
-        PhoneAddressBean bean = (PhoneAddressBean) data;
-
+    public void showPhoneResult(PhoneAddressBean bean) {
+        if (bean == null) return;
         tvPhone.setText(bean.getMobileNumber());
         tvCity.setText(bean.getCity());
         tvProvince.setText(bean.getProvince());
         tvOperator.setText(bean.getOperator());
-    }
-
-    @Override
-    public void mvpError(String action, int code, String msg) {
-        showToast(msg);
     }
 }

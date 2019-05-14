@@ -8,15 +8,13 @@ import com.r.mvp.cn.root.IMvpPresenter;
 import com.ruffian.library.widget.RTextView;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseFragment;
-import com.rx.mvp.cn.model.GlobalConstants;
-import com.rx.mvp.cn.model.account.entity.UserBean;
-import com.rx.mvp.cn.model.account.iface.ILoginView;
+import com.rx.mvp.cn.model.account.contract.AccountContract;
 import com.rx.mvp.cn.model.account.presenter.LoginPresenter;
+import com.rx.mvp.cn.model.phone.contract.PhoneContract;
 import com.rx.mvp.cn.model.phone.entity.PhoneAddressBean;
-import com.rx.mvp.cn.model.phone.iface.IPhoneAddressView;
 import com.rx.mvp.cn.model.phone.presenter.PhoneAddressPresenter;
-import com.rx.mvp.cn.utils.ToastUtils;
 import com.rx.mvp.cn.widget.RLoadingDialog;
+import com.trello.rxlifecycle2.LifecycleProvider;
 
 import butterknife.BindView;
 
@@ -26,7 +24,7 @@ import butterknife.BindView;
  *
  * @author ZhongDaFeng
  */
-public class MultipleFragment extends BaseFragment implements ILoginView, IPhoneAddressView {
+public class MultipleFragment extends BaseFragment implements AccountContract.ILoginView, PhoneContract.IPhoneView {
 
     @BindView(R.id.tv_uid)
     RTextView tvUid;
@@ -39,9 +37,8 @@ public class MultipleFragment extends BaseFragment implements ILoginView, IPhone
     @BindView(R.id.tv_operator)
     TextView tvOperator;
 
-    private LoginPresenter mLoginPresenter = new LoginPresenter(this);
-    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this);
-    private RLoadingDialog mLoadingDialog;
+    private LoginPresenter mLoginPresenter = new LoginPresenter();
+    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter();
 
     //手机号码
     private String mPhoneNumber = "1351073";
@@ -70,7 +67,6 @@ public class MultipleFragment extends BaseFragment implements ILoginView, IPhone
         mLoginPresenter.login(mUserName, mPsw);
         //查询
         mPhonePst.phoneQuery(mPhoneNumber);
-
     }
 
     @Override
@@ -78,60 +74,24 @@ public class MultipleFragment extends BaseFragment implements ILoginView, IPhone
         return new IMvpPresenter[]{mLoginPresenter, mPhonePst};
     }
 
+    /**
+     * 用户信息展示
+     */
     @Override
-    public void showToast(String msg) {
-        ToastUtils.showToast(mContext, msg);
+    public void showResult(String data) {
+        tvUid.setText(data);
     }
 
     @Override
-    public void mvpLoading(String action, boolean show) {
-        /**
-         * 区分action  只有action是登录业务时才需要loading  （根据开发者具体业务需求实现）
-         */
-        if (GlobalConstants.ACTION_LOGIN.equals(action)) {
-            if (show) {
-                mLoadingDialog.show();
-            } else {
-                mLoadingDialog.dismiss();
-            }
-        }
-    }
-
-    @Override
-    public <M> void mvpData(String action, M data) {
-        if (GlobalConstants.ACTION_LOGIN.equals(action)) {//登录返回数据
-            UserBean bean = (UserBean) data;
-            setupUserInfo(bean);
-        } else if (GlobalConstants.ACTION_QUERY_PHONE.equals(action)) {//号码查询返回数据
-            PhoneAddressBean bean = (PhoneAddressBean) data;
-            setupPhoneInfo(bean);
-        }
-    }
-
-    @Override
-    public void mvpError(String action, int code, String msg) {
-        /**
-         * 具体业务具体分析，这里不需要根据action或者code做特殊处理，因此一并吐司提示
-         */
+    public void showError(int code, String msg) {
         showToast(msg);
     }
 
     /**
-     * 设置用户UI
-     *
-     * @param bean
+     * 号码查询结果展示
      */
-    private void setupUserInfo(UserBean bean) {
-        if (bean == null) return;
-        tvUid.setText(bean.getUid());
-    }
-
-    /**
-     * 设置号码相关UI
-     *
-     * @param bean
-     */
-    private void setupPhoneInfo(PhoneAddressBean bean) {
+    @Override
+    public void showPhoneResult(PhoneAddressBean bean) {
         if (bean == null) return;
         tvPhone.setText(bean.getMobileNumber());
         tvCity.setText(bean.getCity());
@@ -139,4 +99,8 @@ public class MultipleFragment extends BaseFragment implements ILoginView, IPhone
         tvOperator.setText(bean.getOperator());
     }
 
+    @Override
+    public LifecycleProvider getRxLifecycle() {
+        return this;
+    }
 }

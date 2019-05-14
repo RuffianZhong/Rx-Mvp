@@ -3,11 +3,15 @@ package com.rx.mvp.cn.base;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.r.mvp.cn.MvpFragment;
+import com.r.mvp.cn.root.IMvpPresenter;
+import com.rx.mvp.cn.utils.ToastUtils;
+import com.rx.mvp.cn.widget.RLoadingDialog;
 
 import java.util.List;
 
@@ -29,6 +33,7 @@ public abstract class BaseFragment extends MvpFragment implements EasyPermission
     protected Context mContext;
     protected Unbinder unBinder;
     protected View mView;
+    protected RLoadingDialog mLoadingDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,7 @@ public abstract class BaseFragment extends MvpFragment implements EasyPermission
         if (mContext == null) return;
         mView = getContentView();
         unBinder = ButterKnife.bind(this, mView);
+        mLoadingDialog = new RLoadingDialog(getActivity(), true);
         initBundleData();
         initView();
         initData();
@@ -95,5 +101,46 @@ public abstract class BaseFragment extends MvpFragment implements EasyPermission
     @Override
     public void onPermissionsDenied(int requestCode, List<String> list) {
     }
+
+
+    /**------------MVP通用方法避免每个组件都要实现--------------**/
+
+    /**
+     * Presenter绑定入口，组件使用Presenter时存入具体值
+     */
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[0];
+    }
+
+    /**------------MVP->View层方法预实现{@link com.r.mvp.cn.MvpView}--------------**/
+
+    /**
+     * 展示吐司
+     */
+    public void showToast(@NonNull String msg) {
+        ToastUtils.showToast(getActivity(), msg);
+    }
+
+    /**
+     * 显示进度View
+     */
+    public void showProgressView() {
+        mLoadingDialog.show();
+    }
+
+    /**
+     * 隐藏进度View
+     */
+    public void dismissProgressView() {
+        mLoadingDialog.dismiss();
+    }
+
+    /**
+     * 获取Activity实例(Fragment本身存在getActivity取巧不用实现)
+     */
+    /*public Activity getActivity() {
+        return getActivity();
+    }*/
 
 }
