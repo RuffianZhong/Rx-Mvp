@@ -1,7 +1,5 @@
 package com.rx.mvp.cn.model.account.presenter;
 
-import android.util.Log;
-
 import com.r.mvp.cn.MvpPresenter;
 import com.r.mvp.cn.model.ModelCallback;
 import com.r.mvp.cn.model.ModelFactory;
@@ -22,7 +20,6 @@ public class LoginPresenter extends MvpPresenter<AccountContract.ILoginView> {
      */
     public void login(String userName, String password) {
 
-        Log.e("tag", "============" + (getView() == null));
         //显示loading框
         getView().showProgressView();
 
