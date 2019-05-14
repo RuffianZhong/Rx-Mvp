@@ -2,23 +2,22 @@
 package com.r.mvp.cn;
 
 import android.support.annotation.UiThread;
-import android.util.Log;
 
+import com.r.mvp.cn.proxy.MvpViewProxy;
 import com.r.mvp.cn.root.IMvpPresenter;
 import com.r.mvp.cn.root.IMvpView;
-
-import java.lang.ref.WeakReference;
-import java.lang.reflect.ParameterizedType;
 
 /**
  * Presenter基础实现
  *
  * @param <V>
  */
-public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
+public abstract class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
 
-    /*View弱引用*/
-    private WeakReference<V> viewRef;
+    protected V mView;
+
+    //View代理对象
+    protected MvpViewProxy<V> mMvpViewProxy;
 
     /**
      * 获取view
@@ -27,7 +26,7 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @UiThread
     public V getView() {
-        return viewRef == null ? null : viewRef.get();
+        return mView;
     }
 
     /**
@@ -37,7 +36,7 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @UiThread
     public boolean isViewAttached() {
-        return viewRef != null && viewRef.get() != null;
+        return mView != null;
     }
 
     /**
@@ -48,7 +47,8 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
     @UiThread
     @Override
     public void attachView(V view) {
-        viewRef = new WeakReference<V>(view);
+        mMvpViewProxy = new MvpViewProxy<V>();
+        mView = (V) mMvpViewProxy.newProxyInstance(view);
     }
 
     /**
@@ -56,14 +56,9 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @Override
     public void detachView() {
-        if (viewRef != null) {
-            viewRef.clear();
-            viewRef = null;
+        if (mMvpViewProxy != null) {
+            mMvpViewProxy.detachView();
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }
