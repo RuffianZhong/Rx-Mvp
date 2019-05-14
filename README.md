@@ -76,8 +76,12 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
 
 > MVP 是 MVC 框架的升级版本，通过 Presenter 桥梁连接 View 和 Model，使得模块之间更好的解耦
 
-#### MvpPresenter<V extends IMvpView>
+### MVP -> P
 
+>  Presenter 桥梁连接 View 和 Model，使得模块之间更好的解耦。 主要职责绑定/解绑View/销毁时释放资源
+>  通过动态代理方式解决 getView 判空和容错问题
+
+#### 1.Presenter基类定义
 ```
 
 /**
@@ -107,12 +111,16 @@ public interface IMvpPresenter<V extends IMvpView> {
 
 
 /**
- * MvpPresenter
+ * Presenter基础实现
+ *
+ * @param <V>
  */
-public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
+public abstract class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
 
-    /*View弱引用*/
-    private WeakReference<V> viewRef;
+    protected V mView;
+
+    //View代理对象
+    protected MvpViewProxy<V> mMvpViewProxy;
 
     /**
      * 获取view
@@ -121,7 +129,7 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @UiThread
     public V getView() {
-        return viewRef == null ? null : viewRef.get();
+        return mView;
     }
 
     /**
@@ -131,7 +139,7 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @UiThread
     public boolean isViewAttached() {
-        return viewRef != null && viewRef.get() != null;
+        return mView != null;
     }
 
     /**
@@ -142,7 +150,8 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
     @UiThread
     @Override
     public void attachView(V view) {
-        viewRef = new WeakReference<V>(view);
+        mMvpViewProxy = new MvpViewProxy<V>();
+        mView = (V) mMvpViewProxy.newProxyInstance(view);
     }
 
     /**
@@ -150,135 +159,384 @@ public class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
      */
     @Override
     public void detachView() {
-        if (viewRef != null) {
-            viewRef.clear();
-            viewRef = null;
+        if (mMvpViewProxy != null) {
+            mMvpViewProxy.detachView();
         }
+    }
+
+}
+
+```
+
+#### 2.Presenter使用
+
+```
+/**
+ * 登录Presenter
+ * 备注:继承 MvpPresenter 指定 View 类型
+ *
+ * @author ZhongDaFeng
+ */
+public class LoginPresenter extends MvpPresenter<AccountContract.ILoginView> {
+
+    /**
+     * 登录
+     */
+    public void login(String userName, String password) {
+
+        //显示loading框
+        getView().showProgressView();
+
+        //调用model获取网络数据
+        ModelFactory.getModel(AccountModel.class).login(getView().getActivity(), userName, password, getView().getRxLifecycle(), new ModelCallback.Http<UserBean>() {
+            @Override
+            public void onSuccess(UserBean data) {
+                //model数据回传
+
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                StringBuffer sb = new StringBuffer();
+                sb.append("登录成功")
+                        .append("\n")
+                        .append("用户ID:")
+                        .append(data.getUid())
+                        .append("\n")
+                        .append("Token:")
+                        .append("\n")
+                        .append(data.getToken())
+                        .append("\n")
+                        .append("最后登录:")
+                        .append("\n")
+                        .append(data.getTime());
+
+                //用户信息展示
+                getView().showResult(sb.toString());
+
+            }
+
+            @Override
+            public void onError(int code, String desc) {
+                //model数据回传
+
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                //错误信息提示
+                getView().showError(code, desc);
+            }
+
+            @Override
+            public void onCancel() {
+                //关闭弹窗
+                getView().dismissProgressView();
+            }
+        });
+
+    }
+
+    /**
+     * 获取本地缓存数据
+     */
+    public void getLocalCache() {
+
+        //调用model获取本地数据
+        ModelFactory.getModel(AccountModel.class).getLocalCache(getView().getActivity(), getView().getRxLifecycle(), new ModelCallback.Data<String>() {
+            @Override
+            public void onSuccess(String object) {
+                //model数据回传
+
+                //关闭弹窗
+                getView().dismissProgressView();
+
+                //用户信息展示
+                getView().showResult(object);
+
+            }
+        });
     }
 
     @Override
     public void destroy() {
+		//一些对象的释放
+    }
+}
+
+```
+
+
+
+### MVP -> V
+
+>  定义View接口在具体组件中实现，定义常用公用View方法，具体业务接口开发者自行定义
+
+```
+另外一套思想：MvpView 定义三个基础接口，具体组件实现
+loading/data/error
+1. lde 思想: 页面通用  加载中/展示数据/错误处理
+2. action 方式: 考虑多个请求时 根据 action 区分处理
+
+  void mvpLoading(String action, boolean show);
+  <M> void mvpData(String action, M data);
+  void mvpError(String action, int code, String msg);
+
+作者最终放弃此方式，感兴趣查看分支 master.release.mvp_lde
+```
+
+
+```
+
+	/**
+	 * IMvpView
+	 */
+	public interface IMvpView {
+	}
+
+
+	/**
+	 * 基础View接口
+	 */
+	public interface MvpView extends IMvpView {
+	
+	    /**
+	     * RxLifecycle用于绑定组件生命周期
+	     *
+	     * @return
+	     */
+	    LifecycleProvider getRxLifecycle();
+	
+	    /**
+	     * 获取Activity实例
+	     *
+	     * @return
+	     */
+	    Activity getActivity();
+	
+	    /**
+	     * 展示吐司
+	     *
+	     * @param msg 吐司文本
+	     */
+	    @UiThread
+	    void showToast(@NonNull String msg);
+	
+	    /**
+	     * 显示进度View
+	     */
+	    @UiThread
+	    void showProgressView();
+	
+	    /**
+	     * 隐藏进度View
+	     */
+	    @UiThread
+	    void dismissProgressView();
+	
+	}
+
+	 /**------------View具体使用--------------**/
+
+	/**
+	 * 登录view
+	 * 备注: MvpView 未能满足需求时新增方法
+	 */
+    interface ILoginView extends MvpView {
+
+        /*登录成功展示结果*/
+        @UiThread
+        void showResult(String data);
+
+        /*登录错误处理逻辑*/
+        @UiThread
+        void showError(int code, String msg);
+    }
+```
+
+
+
+### MVP -> M
+
+>  Model 这里认为只负责获取和解析数据，再回调给Presenter
+
+```
+	/**
+	 * MVP  根Model
+	 * MvpModel创建之后全局静态持有，因此不能持有短生命周期的对象，避免内存泄漏
+	 *
+	 * @author ZhongDaFeng
+	 */
+	public interface IMvpModel {
+	
+	}
+	
+	
+	/**
+	 * 模块数据回调接口
+	 *
+	 * @author ZhongDaFeng
+	 */
+	public interface ModelCallback {
+	
+	    /**
+	     * 网络数据回调，泛指http
+	     *
+	     * @param <T>
+	     */
+	    interface Http<T> {
+	
+	        public void onSuccess(T object);
+	
+	        public void onError(int code, String desc);
+	
+	        public void onCancel();
+	    }
+	
+	    /**
+	     * 其他数据回调<本地数据，数据库等>
+	     *
+	     * @param <T>
+	     */
+	    interface Data<T> {
+	
+	        public void onSuccess(T object);
+	    }
+	
+	}
+
+	 /**------------Model具体使用--------------**/
+
+    /**
+     * 登录模块model接口.此处根据具体项目决定是否需要此接口层
+     */
+    interface LoginModel extends IMvpModel {
+        /**
+         * 用户密码登录
+         *
+         * @param lifecycle     组件生命周期
+         * @param modelCallback model回调接口(网络)
+         */
+        void login(final Context context, String userName, String password, LifecycleProvider lifecycle, ModelCallback.Http<UserBean> modelCallback);
+
+        /**
+         * 获取本地缓存数据
+         *
+         * @param modelCallback model回调接口(普通数据)
+         */
+        void getLocalCache(Context context, LifecycleProvider lifecycle, ModelCallback.Data<String> modelCallback);
+
+        /**
+         * 缓存数据
+         */
+        void saveLocalCache(Context context, UserBean data);
     }
 
-}
+	/**
+	 * AccountModel
+	 *
+	 * @author ZhongDaFeng
+	 */
+	public class AccountModel implements AccountContract.LoginModel {
+	
+	    private final String key_user_cache = "key_user_info";
+	
+	    @Override
+	    public void login(final Context context, String userName, String password, LifecycleProvider lifecycle, final ModelCallback.Http<UserBean> modelCallback) {
+	
+	        //Biz发起网络请求
+	        BizFactory.getBiz(UserBiz.class).login(userName, password, lifecycle, new RHttpCallback<UserBean>() {
+	
+	            @Override
+	            public UserBean convert(JsonElement data) {
+	                return new Gson().fromJson(data, UserBean.class);
+	            }
+	
+	            @Override
+	            public void onSuccess(UserBean value) {
+	
+	                String time = new SimpleDateFormat("yyyy/mm/dd HH:mm:ss").format(System.currentTimeMillis());
+	                value.setTime(time);
+	                //回调给Presenter
+	                modelCallback.onSuccess(value);
+	                //保存到本地数据
+	                saveLocalCache(context, value);
+	            }
+	
+	            @Override
+	            public void onError(int code, String desc) {
+	                //回调给Presenter
+	                modelCallback.onError(code, desc);
+	            }
+	
+	            @Override
+	            public void onCancel() {
+	                //回调给Presenter
+	                modelCallback.onCancel();
+	            }
+	        });
+	
+	    }
+	
+	    @Override
+	    public void getLocalCache(final Context context, LifecycleProvider lifecycle, final ModelCallback.Data<String> modelCallback) {
+	        //RxJava异步解析本地数据
+	        Observable.create(new ObservableOnSubscribe<String>() {
+	            @Override
+	            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+	
+	                //模拟工作线程获取并解析数据
+	                String userInfo = SpUtils.getSpUtils(context).getSPValue(key_user_cache, "");
+	
+	                e.onNext(userInfo);
+	                e.onComplete();
+	
+	            }
+	        }).subscribeOn(Schedulers.io())//工作线程
+	                .observeOn(AndroidSchedulers.mainThread())
+	                .compose(lifecycle.<String>bindToLifecycle())//绑定生命周期
+	                .subscribe(new Observer<String>() {
+	                    @Override
+	                    public void onSubscribe(@NonNull Disposable d) {
+	
+	                    }
+	
+	                    @Override
+	                    public void onNext(@NonNull String userBean) {
+	                        modelCallback.onSuccess(userBean);  //回调给Presenter
+	                    }
+	
+	                    @Override
+	                    public void onError(@NonNull Throwable e) {
+	                        modelCallback.onSuccess("");
+	                    }
+	
+	                    @Override
+	                    public void onComplete() {
+	
+	                    }
+	                });
+	    }
+	
+	    @Override
+	    public void saveLocalCache(Context context, UserBean data) {
+	        StringBuffer sb = new StringBuffer();
+	        sb.append("用户ID:")
+	                .append(data.getUid())
+	                .append("\n")
+	                .append("Token:")
+	                .append("\n")
+	                .append(data.getToken())
+	                .append("\n")
+	                .append("最后登录:")
+	                .append("\n")
+	                .append(data.getTime());
+	
+	        SpUtils.getSpUtils(context).putSPValue(key_user_cache, sb.toString());
+	    }
+	}
+
 
 ```
 
-#### Presenter使用
-
-```
-	class LoginPresenter extends MvpPresenter<ILoginView> {
-
-	 /*登录逻辑*/
-     public void login() {
-		//loading	
-		getView().mvpLoading(ACTION_LOGIN, true);
-
-        new RHttp.Builder()
-                .post()
-                .apiUrl("user/login")
-                .addParameter(parameterMap)
-                .lifecycle(getActivity())
-                .build()
-                .request(new RHttpCallback<UserBean>() {
-                    @Override
-                    public UserBean convert(JsonElement data) {
-                        return new Gson().fromJson(data, UserBean.class);
-                    }
-
-                    @Override
-                    public void onSuccess(UserBean object) {
-                        if (isViewAttached()) {
-                            getView().mvpLoading(ACTION_LOGIN, false);
-                            getView().mvpData(ACTION_LOGIN, object);
-                        }
-                    }
-
-                    @Override
-                    public void onError(int code, String desc) {
-                        if (isViewAttached()) {
-                            getView().mvpLoading(ACTION_LOGIN, false);
-                            getView().mvpError(ACTION_LOGIN, code, desc);
-                        }
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        if (isViewAttached()) {
-                            getView().mvpLoading(ACTION_LOGIN, false);
-                        }
-                    }
-                });
-    }
-    }
-```
-
-
-#### MvpView
-```
-
-/**
- * IMvpView
- */
-public interface IMvpView {
-}
-
-
-/**
- * 基础View接口
- * 备注:loading/data/error
- * 1. lde 思想: 页面通用  加载中/展示数据/错误处理
- * 2. action 方式: 考虑多个请求时 根据 action 区分处理
- */
-public interface MvpView extends IMvpView {
-
-    /**
-     * mvp 加载中
-     *
-     * @param action 区分不同事件
-     * @param show   开启/关闭 true:开启
-     */
-    @UiThread
-    void mvpLoading(String action, boolean show);
-
-    /**
-     * mvp 展示数据
-     *
-     * @param action 区分不同事件
-     * @param data   数据
-     * @param <M>
-     */
-    @UiThread
-    <M> void mvpData(String action, M data);
-
-    /**
-     * mvp 错误处理
-     *
-     * @param action 区分不同事件
-     * @param code   错误码
-     * @param msg    错误信息
-     */
-    @UiThread
-    void mvpError(String action, int code, String msg);
-
-}
-
-
-/**
- * 登录view
- * 备注: MvpView 未能满足需求时新增方法
- */
-public interface ILoginView extends MvpView {
-
-    /**
-     * 额外方法显示吐司
-     *
-     * @param msg
-     */
-    void showToast(String msg);
-
-}
-```
 
 #### MvpActivity/MvpFragment
 
@@ -301,64 +559,125 @@ public abstract class MvpActivity<V extends IMvpView, P extends IMvpPresenter<V>
 #### Activity使用
 
 ```
-    class XActivity extends MvpActivity implements ILoginView, IPhoneAddressView {
-		
-        //登录Presenter
-        LoginPresenter loginPresenter = new LoginPresenter(this);
-		//获取号码归属地	
-    	PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter(this);
+public class LoginActivity extends BaseActivity implements AccountContract.ILoginView {
 
-        @Override
-        protected void onCreate(@Nullable Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            loginPresenter.login();
-			mPhonePst.query();
-        }
+    @BindView(R.id.et_user_name)
+    EditText etUserName;
+    @BindView(R.id.et_password)
+    EditText etPassword;
+    @BindView(R.id.tv_result)
+    TextView tvResult;
 
-        @Override
-	    protected IMvpPresenter[] getPresenterArray() {
-	        return new IMvpPresenter[]{mLoginPresenter, mPhonePst};
-	    }
-	
-	    @Override
-	    public void showToast(String msg) {
-	        ToastUtils.showToast(mContext, msg);
-	    }
-	
-	    @Override
-	    public void mvpLoading(String action, boolean show) {
-	        /**
-	         * 区分action  只有action是登录业务时才需要loading  （根据开发者具体业务需求实现）
-	         */
-	        if (GlobalConstants.ACTION_LOGIN.equals(action)) {
-	            if (show) {
-	                mLoadingDialog.show();
-	            } else {
-	                mLoadingDialog.dismiss();
-	            }
-	        }
-	    }
-	
-	    @Override
-	    public <M> void mvpData(String action, M data) {
-	        if (GlobalConstants.ACTION_LOGIN.equals(action)) {//登录返回数据
-	            UserBean bean = (UserBean) data;
-	            setupUserInfo(bean);
-	        } else if (GlobalConstants.ACTION_QUERY_PHONE.equals(action)) {//号码查询返回数据
-	            PhoneAddressBean bean = (PhoneAddressBean) data;
-	            setupPhoneInfo(bean);
-	        }
-	    }
-	
-	    @Override
-	    public void mvpError(String action, int code, String msg) {
-	        /**
-	         * 具体业务具体分析，这里不需要根据action或者code做特殊处理，因此一并吐司提示
-	         */
-	        showToast(msg);
-	    }
+    private LoginPresenter mLoginPresenter = new LoginPresenter();
+
+    @Override
+    protected int getContentViewId() {
+        return R.layout.activity_login;
     }
+
+    @Override
+    protected void initBundleData() {
+    }
+
+    @Override
+    protected void initView() {
+    }
+
+    @Override
+    protected void initData() {
+        //获取缓存数据
+        mLoginPresenter.getLocalCache();
+    }
+
+    @OnClick({R.id.login})
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.login:
+                String userName = etUserName.getText().toString();
+                String password = etPassword.getText().toString();
+                if (TextUtils.isEmpty(userName) || TextUtils.isEmpty(password)) {
+                    return;
+                }
+                //登录
+                mLoginPresenter.login(userName, password);
+                break;
+        }
+    }
+
+    @Override
+    protected IMvpPresenter[] getPresenterArray() {
+        return new IMvpPresenter[]{mLoginPresenter};
+    }
+
+    @Override
+    public LifecycleProvider getRxLifecycle() {
+        return this;
+    }
+
+    @Override
+    public void showResult(String data) {
+        tvResult.setText(data);
+    }
+
+    @Override
+    public void showError(int code, String msg) {
+        showToast(msg);
+    }
+}
 ```
+
+### MVP -> 文件过多？
+
+> 这里为了解决MVP模式创建过多的接口类，引入Contract(协议)
+
+```
+/**
+ * Account业务的Contract(协议)
+ * 目的：避免mvp架构 view/model 文件过多
+ * 综合管理某业务的 view/model 接口
+ *
+ * @author ZhongDaFeng
+ */
+public interface AccountContract {
+
+    /*登录模块View接口*/
+    interface ILoginView extends MvpView {
+
+        /*登录成功展示结果*/
+        @UiThread
+        void showResult(String data);
+
+        /*登录错误处理逻辑*/
+        @UiThread
+        void showError(int code, String msg);
+    }
+
+    /*登录模块model接口.此处根据具体项目决定是否需要此接口层*/
+    interface LoginModel extends IMvpModel {
+        /**
+         * 用户密码登录
+         *
+         * @param lifecycle     组件生命周期
+         * @param modelCallback model回调接口(网络)
+         */
+        void login(final Context context, String userName, String password, LifecycleProvider lifecycle, ModelCallback.Http<UserBean> modelCallback);
+
+        /**
+         * 获取本地缓存数据
+         *
+         * @param modelCallback model回调接口(普通数据)
+         */
+        void getLocalCache(Context context, LifecycleProvider lifecycle, ModelCallback.Data<String> modelCallback);
+
+        /**
+         * 缓存数据
+         */
+        void saveLocalCache(Context context, UserBean data);
+    }
+
+}
+```
+
 
 
 ```
@@ -369,7 +688,7 @@ public abstract class MvpActivity<V extends IMvpView, P extends IMvpPresenter<V>
      *
      * 欢迎提供建议/意见，不断完善框架
      *
-     * 喜欢就start吧，收获知识激励别人
+     * 喜欢就star吧，收获知识激励别人
      */
 
 ```
@@ -381,22 +700,4 @@ public abstract class MvpActivity<V extends IMvpView, P extends IMvpPresenter<V>
 MIT License
 
 Copyright (c) 2018 Ruffian-痞子
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 ```
