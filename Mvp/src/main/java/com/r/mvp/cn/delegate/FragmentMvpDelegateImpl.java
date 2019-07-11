@@ -94,6 +94,8 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
             for (int i = 0; i < pArray.length; i++) {
                 presenter = pArray[i];
                 if (presenter != null) {
+                    //解除View
+                    presenter.detachView();
                     if (!retainVPInstance(activity, fragment)) {
                         //销毁 V & P 实例
                         presenter.destroy();
@@ -109,17 +111,6 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
 
     @Override
     public void onDestroyView() {
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            P presenter;
-            for (int i = 0; i < pArray.length; i++) {
-                presenter = pArray[i];
-                if (presenter != null) {
-                    //解除View
-                    presenter.detachView();
-                }
-            }
-        }
     }
 
     @Override
