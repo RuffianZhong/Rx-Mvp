@@ -203,10 +203,10 @@ public class RHttp {
             }
         }
 
-       /*请求处理*/
+        /*请求处理*/
         Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl()).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
 
-       /* 被观察者 httpObservable */
+        /* 被观察者 httpObservable */
         HttpObservable httpObservable = new HttpObservable.Builder(apiObservable)
                 .httpObserver(uploadCallback)
                 .lifecycleProvider(lifecycle)
@@ -233,7 +233,7 @@ public class RHttp {
     /*处理Header*/
     private void disposeHeader() {
 
-       /*header空处理*/
+        /*header空处理*/
         if (header == null) {
             header = new TreeMap<>();
         }
@@ -370,7 +370,7 @@ public class RHttp {
         }
 
         public Map<String, Object> getBaseHeader() {
-            return header;
+            return header == null ? new TreeMap<String, Object>() : header;
         }
 
         /*超时时长*/
