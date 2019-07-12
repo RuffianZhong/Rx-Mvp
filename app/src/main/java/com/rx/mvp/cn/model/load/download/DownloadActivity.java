@@ -62,11 +62,6 @@ public class DownloadActivity extends BaseActivity {
         RDownLoad.get().startDownload(bean);//开始下载
     }
 
-    @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
-    }
-
     /**
      * 适配器
      */

@@ -6,7 +6,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.model.phone.contract.PhoneContract;
@@ -23,7 +22,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class PhoneAddressActivity extends BaseActivity implements PhoneContract.IPhoneView {
+public class PhoneAddressActivity extends BaseActivity<PhoneContract.IPhoneView, PhoneAddressPresenter> implements PhoneContract.IPhoneView {
 
     @BindView(R.id.et_phone)
     EditText etPhone;
@@ -35,8 +34,6 @@ public class PhoneAddressActivity extends BaseActivity implements PhoneContract.
     TextView tvCity;
     @BindView(R.id.tv_operator)
     TextView tvOperator;
-
-    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter();
 
     @Override
     protected int getContentViewId() {
@@ -76,13 +73,14 @@ public class PhoneAddressActivity extends BaseActivity implements PhoneContract.
             Toast.makeText(mContext, getString(R.string.hint_phone), Toast.LENGTH_SHORT).show();
             return;
         }
-        mPhonePst.phoneQuery(phone);
+        getPresenter().phoneQuery(phone);
     }
 
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[]{mPhonePst};
+    public PhoneAddressPresenter createPresenter() {
+        return new PhoneAddressPresenter();
     }
+
 
     @Override
     public void showPhoneResult(PhoneAddressBean bean) {

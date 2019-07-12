@@ -24,7 +24,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class PhoneAddressFragment extends BaseFragment implements PhoneContract.IPhoneView {
+public class PhoneAddressFragment extends BaseFragment<PhoneContract.IPhoneView, PhoneAddressPresenter> implements PhoneContract.IPhoneView {
 
     @BindView(R.id.et_phone)
     EditText etPhone;
@@ -36,8 +36,6 @@ public class PhoneAddressFragment extends BaseFragment implements PhoneContract.
     TextView tvCity;
     @BindView(R.id.tv_operator)
     TextView tvOperator;
-
-    private PhoneAddressPresenter mPhonePst = new PhoneAddressPresenter();
 
     @Override
     protected View getContentView() {
@@ -77,12 +75,12 @@ public class PhoneAddressFragment extends BaseFragment implements PhoneContract.
             Toast.makeText(mContext, getString(R.string.hint_phone), Toast.LENGTH_SHORT).show();
             return;
         }
-        mPhonePst.phoneQuery(phone);
+        getPresenter().phoneQuery(phone);
     }
 
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[]{mPhonePst};
+    public PhoneAddressPresenter createPresenter() {
+        return new PhoneAddressPresenter();
     }
 
     @Override

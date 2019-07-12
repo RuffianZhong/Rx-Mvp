@@ -3,7 +3,6 @@ package com.rx.mvp.cn.sample.mvp;
 import android.support.annotation.NonNull;
 import android.view.View;
 
-import com.r.mvp.cn.root.IMvpPresenter;
 import com.rx.mvp.cn.base.BaseFragment;
 import com.rx.mvp.cn.model.account.entity.UserBean;
 import com.rx.mvp.cn.utils.ToastUtils;
@@ -14,9 +13,7 @@ import com.trello.rxlifecycle2.LifecycleProvider;
  *
  * @author ZhongDaFeng
  */
-public class AccountFragment extends BaseFragment implements AccountContract.ILoginView {
-
-    private AccountPresenter accountPresenter = new AccountPresenter();
+public class AccountFragment extends BaseFragment<AccountContract.ILoginView, AccountPresenter> implements AccountContract.ILoginView {
 
     @Override
     protected View getContentView() {
@@ -36,25 +33,22 @@ public class AccountFragment extends BaseFragment implements AccountContract.ILo
     @Override
     protected void initData() {
         //默认加载本地缓存数据
-        accountPresenter.getLocalCache("123456");
+        getPresenter().getLocalCache("123456");
 
         new View(getActivity()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //账号密码登录
-                accountPresenter.login("acb", "123456");
+                getPresenter().login("acb", "123456");
             }
         });
     }
 
     /*---------mvp--------*/
 
-    /**
-     * 需要使用Presenter时 覆盖重写
-     */
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[]{accountPresenter};
+    public AccountPresenter createPresenter() {
+        return new AccountPresenter();
     }
 
     @Override

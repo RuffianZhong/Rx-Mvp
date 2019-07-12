@@ -30,7 +30,7 @@ public class MultipleActivity extends BaseActivity {
 
     private BasePagerAdapter mPagerAdapter;
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();
-    private List<String> mList = Arrays.asList("综合使用", "用户登录", "号码查询");
+    private List<String> mList = Arrays.asList("用户登录", "号码查询");
 
     @Override
     protected int getContentViewId() {
@@ -50,7 +50,6 @@ public class MultipleActivity extends BaseActivity {
     @Override
     protected void initData() {
 
-        mFragmentList.add(new MultipleFragment());
         mFragmentList.add(new LoginFragment());
         mFragmentList.add(new PhoneAddressFragment());
         mPagerAdapter = new BasePagerAdapter(getSupportFragmentManager(), mFragmentList);

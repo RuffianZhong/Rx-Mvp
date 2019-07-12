@@ -23,7 +23,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class LoginFragment extends BaseFragment implements AccountContract.ILoginView {
+public class LoginFragment extends BaseFragment<AccountContract.ILoginView, LoginPresenter> implements AccountContract.ILoginView {
 
     @BindView(R.id.et_user_name)
     EditText etUserName;
@@ -32,7 +32,6 @@ public class LoginFragment extends BaseFragment implements AccountContract.ILogi
     @BindView(R.id.tv_result)
     TextView tvResult;
 
-    private LoginPresenter mLoginPresenter = new LoginPresenter();
 
     @Override
     protected View getContentView() {
@@ -52,7 +51,7 @@ public class LoginFragment extends BaseFragment implements AccountContract.ILogi
     @Override
     protected void initData() {
         //获取缓存数据
-        mLoginPresenter.getLocalCache();
+        getPresenter().getLocalCache();
     }
 
     @OnClick({R.id.login})
@@ -64,14 +63,14 @@ public class LoginFragment extends BaseFragment implements AccountContract.ILogi
                 if (TextUtils.isEmpty(userName) || TextUtils.isEmpty(password)) {
                     return;
                 }
-                mLoginPresenter.login( userName, password);
+                getPresenter().login(userName, password);
                 break;
         }
     }
 
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[]{mLoginPresenter};
+    public LoginPresenter createPresenter() {
+        return new LoginPresenter();
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.View;
 
 import com.r.mvp.cn.root.IMvpPresenter;
+import com.r.mvp.cn.root.IMvpView;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
 import com.rx.mvp.cn.model.account.activity.LoginActivity;
@@ -19,7 +20,7 @@ import java.util.List;
 import butterknife.OnClick;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity<IMvpView, IMvpPresenter<IMvpView>> {
 
     @Override
     protected int getContentViewId() {
@@ -80,11 +81,6 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onPermissionsGranted(int requestCode, List<String> list) {
         LogUtils.e("申请权限失败");
-    }
-
-    @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
     }
 }
 

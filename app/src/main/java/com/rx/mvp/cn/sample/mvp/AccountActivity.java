@@ -14,9 +14,7 @@ import com.trello.rxlifecycle2.LifecycleProvider;
  *
  * @author ZhongDaFeng
  */
-public class AccountActivity extends BaseActivity implements AccountContract.ILoginView {
-
-    private AccountPresenter accountPresenter = new AccountPresenter();
+public class AccountActivity extends BaseActivity<AccountContract.ILoginView, AccountPresenter> implements AccountContract.ILoginView {
 
     @Override
     protected int getContentViewId() {
@@ -36,13 +34,13 @@ public class AccountActivity extends BaseActivity implements AccountContract.ILo
     @Override
     protected void initData() {
         //默认加载本地缓存数据
-        accountPresenter.getLocalCache("123456");
+        getPresenter().getLocalCache("123456");
 
         new View(this).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //账号密码登录
-                accountPresenter.login("acb", "123456");
+                getPresenter().login("acb", "123456");
             }
         });
     }
@@ -50,12 +48,9 @@ public class AccountActivity extends BaseActivity implements AccountContract.ILo
 
     /*---------mvp--------*/
 
-    /**
-     * 需要使用Presenter时 覆盖重写
-     */
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[]{accountPresenter};
+    public AccountPresenter createPresenter() {
+        return new AccountPresenter();
     }
 
     @Override

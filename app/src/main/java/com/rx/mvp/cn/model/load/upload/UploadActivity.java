@@ -3,7 +3,6 @@ package com.rx.mvp.cn.model.load.upload;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,13 +15,11 @@ import com.lzy.imagepicker.ImagePicker;
 import com.lzy.imagepicker.bean.ImageItem;
 import com.lzy.imagepicker.loader.ImageLoader;
 import com.lzy.imagepicker.ui.ImageGridActivity;
-import com.lzy.imagepicker.view.CropImageView;
 import com.r.http.cn.RHttp;
-import com.r.http.cn.utils.LogUtils;
 import com.r.mvp.cn.root.IMvpPresenter;
+import com.r.mvp.cn.root.IMvpView;
 import com.rx.mvp.cn.R;
 import com.rx.mvp.cn.base.BaseActivity;
-import com.rx.mvp.cn.core.bitmap.ImageLoaderUtils;
 import com.rx.mvp.cn.core.net.http.RUploadCallback;
 
 import java.io.File;
@@ -40,7 +37,7 @@ import butterknife.OnClick;
  *
  * @author ZhongDaFeng
  */
-public class UploadActivity extends BaseActivity {
+public class UploadActivity extends BaseActivity<IMvpView, IMvpPresenter<IMvpView>> {
 
 
     private final int IMAGE_PICKER = 1001;
@@ -197,10 +194,6 @@ public class UploadActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
-    }
 
     /**
      * 图片加载器
