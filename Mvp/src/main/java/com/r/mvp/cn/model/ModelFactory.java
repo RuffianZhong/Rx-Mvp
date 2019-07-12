@@ -11,6 +11,7 @@ import java.util.Map;
  * Model工厂类
  *
  * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public class ModelFactory {
 

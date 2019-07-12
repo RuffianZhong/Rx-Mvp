@@ -14,6 +14,7 @@ import com.r.mvp.cn.root.IMvpView;
  * 备注:主要是连接 Fragment 的生命周期与 Presenter 实现特定生命周期绑定与解除 V
  *
  * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter<V>> implements FragmentMvpDelegate {
 
@@ -69,37 +70,45 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
 
     @Override
     public void onCreate(Bundle saved) {
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            V[] vArray = delegateCallback.getMvpView();
-            P p;
-            V v;
-            for (int i = 0; i < pArray.length; i++) {
-                p = pArray[i];
-                v = vArray[i];
-                if (p != null && v != null) {
-                    //关联view
-                    p.attachView(v);
-                }
-            }
+        /**
+         * 调用创建 Presenter 函数
+         */
+        P presenter = delegateCallback.createPresenter();
+
+        /**
+         * 设置 Presenter
+         */
+        delegateCallback.setPresenter(presenter);
+
+        /**
+         * 获取 View
+         */
+        V view = delegateCallback.getMvpView();
+
+        if (presenter != null && view != null) {
+            //关联view
+            presenter.attachView(view);
         }
     }
 
     @Override
     public void onDestroy() {
-        Activity activity = getActivity();
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            P presenter;
-            for (int i = 0; i < pArray.length; i++) {
-                presenter = pArray[i];
-                if (presenter != null) {
-                    if (!retainVPInstance(activity, fragment)) {
-                        //销毁 V & P 实例
-                        presenter.destroy();
-                    }
+        /**
+         * 移除绑定
+         */
+        try {
+            Activity activity = getActivity();
+            P presenter = delegateCallback.getPresenter();
+            if (presenter != null) {
+                //解除View
+                presenter.detachView();
+                if (!retainVPInstance(activity, fragment)) {
+                    //销毁 V & P 实例
+                    presenter.destroy();
                 }
             }
+        } catch (NullPointerException e) {
+            // e.printStackTrace();
         }
     }
 
@@ -109,17 +118,6 @@ public class FragmentMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
 
     @Override
     public void onDestroyView() {
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            P presenter;
-            for (int i = 0; i < pArray.length; i++) {
-                presenter = pArray[i];
-                if (presenter != null) {
-                    //解除View
-                    presenter.detachView();
-                }
-            }
-        }
     }
 
     @Override

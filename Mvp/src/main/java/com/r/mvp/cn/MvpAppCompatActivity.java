@@ -2,7 +2,6 @@ package com.r.mvp.cn;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.r.mvp.cn.delegate.ActivityMvpDelegate;
 import com.r.mvp.cn.delegate.ActivityMvpDelegateImpl;
@@ -11,44 +10,43 @@ import com.r.mvp.cn.root.IMvpPresenter;
 import com.r.mvp.cn.root.IMvpView;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
-import java.lang.reflect.ParameterizedType;
-
 
 /**
  * MvpAppCompatActivity
  * 备注:
- * 1.XXActivity 继承 MvpActivity,当页面存在 Presenter 时，具体 Activity 需要调用 setPresenter(P... presenter)
+ * 1.XXActivity 继承 MvpActivity,当页面存在 Presenter 时，具体 Activity 需要实现 createPresenter()
  * 2.由于此框架集合了 RxLifecycle 因此本 Activity 继承自 RxActivity (开发者也可以直接继承 Activity)
- * 3.支持一个 Activity 存在多个 Presenter
+ * 3.支持一个 Activity 存在多个 Presenter 查看分支 {@link # https://github.com/RuffianZhong/Rx-Mvp/tree/master.release.mvp_view_1vN_presenter}
  *
- * @param <V>
- * @param <P>
+ * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public abstract class MvpAppCompatActivity<V extends IMvpView, P extends IMvpPresenter<V>> extends RxAppCompatActivity implements IMvpView, MvpDelegateCallback<V, P> {
 
+    private P mPresenter;
     protected ActivityMvpDelegate mvpDelegate;
 
     /**
-     * 获取 Presenter 数组
+     * 创建 Presenter
      */
-    protected abstract P[] getPresenterArray();
+    public abstract P createPresenter();
 
     @Override
-    public P[] getPresenter() {
-        return getPresenterArray();
+    public void setPresenter(P mPresenter) {
+        this.mPresenter = mPresenter;
     }
 
     @Override
-    public V[] getMvpView() {
-        V[] view = null;
-        P[] pArray = getPresenter();
-        if (pArray != null) {
-            view = (V[]) new IMvpView[pArray.length];
-            for (int i = 0; i < pArray.length; i++) {
-                view[i] = (V) this;
-            }
+    public P getPresenter() {
+        if (mPresenter == null) {
+            throw new NullPointerException("createPresenter() must return not null if use getPresenter()");
         }
-        return view;
+        return mPresenter;
+    }
+
+    @Override
+    public V getMvpView() {
+        return (V) this;
     }
 
 

@@ -10,6 +10,9 @@ import com.trello.rxlifecycle2.LifecycleProvider;
 
 /**
  * 基础View接口
+ *
+ * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public interface MvpView extends IMvpView {
 

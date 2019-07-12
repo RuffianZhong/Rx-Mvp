@@ -10,7 +10,8 @@ import com.r.mvp.cn.root.IMvpView;
 /**
  * Presenter基础实现
  *
- * @param <V>
+ * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public abstract class MvpPresenter<V extends IMvpView> implements IMvpPresenter<V> {
 

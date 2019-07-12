@@ -2,18 +2,16 @@ package com.r.mvp.cn.delegate;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.r.mvp.cn.root.IMvpPresenter;
 import com.r.mvp.cn.root.IMvpView;
-
-import java.lang.reflect.ParameterizedType;
 
 /**
  * Activity媒介
  * 备注:主要是连接 Activity 的生命周期与 Presenter 实现特定生命周期绑定与解除 V
  *
  * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public class ActivityMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter<V>> implements ActivityMvpDelegate {
 
@@ -50,39 +48,46 @@ public class ActivityMvpDelegateImpl<V extends IMvpView, P extends IMvpPresenter
     @Override
     public void onCreate(Bundle bundle) {
 
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            V[] vArray = delegateCallback.getMvpView();
-            P presenter;
-            V view;
-            for (int i = 0; i < pArray.length; i++) {
-                presenter = pArray[i];
-                view = vArray[i];
-                if (presenter != null && view != null) {
-                    //关联view
-                    presenter.attachView(view);
-                }
-            }
+        /**
+         * 调用创建 Presenter 函数
+         */
+        P presenter = delegateCallback.createPresenter();
+
+        /**
+         * 设置 Presenter
+         */
+        delegateCallback.setPresenter(presenter);
+
+        /**
+         * 获取 View
+         */
+        V view = delegateCallback.getMvpView();
+
+        if (presenter != null && view != null) {
+            //关联view
+            presenter.attachView(view);
         }
+
     }
 
 
     @Override
     public void onDestroy() {
-        P[] pArray = delegateCallback.getPresenter();
-        if (pArray != null) {
-            P presenter;
-            for (int i = 0; i < pArray.length; i++) {
-                presenter = pArray[i];
-                if (presenter != null) {
-                    //解除View
-                    presenter.detachView();
-                    if (!retainVPInstance(activity)) {
-                        //销毁 V & P 实例
-                        presenter.destroy();
-                    }
+        /**
+         * 移除绑定
+         */
+        try {
+            P presenter = delegateCallback.getPresenter();
+            if (presenter != null) {
+                //解除View
+                presenter.detachView();
+                if (!retainVPInstance(activity)) {
+                    //销毁 V & P 实例
+                    presenter.destroy();
                 }
             }
+        } catch (NullPointerException e) {
+            // e.printStackTrace();
         }
     }
 

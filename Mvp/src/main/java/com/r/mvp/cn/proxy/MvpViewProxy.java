@@ -13,6 +13,7 @@ import java.lang.reflect.Proxy;
  * 原理：通过代理，将 MvpView 的方法调用放在代理类中实现，通过判断代理中 MvpView 是否为空判断是否需要回调方法，同时避免 P 中每次调用  MvpView 都要判空的麻烦
  *
  * @author ZhongDaFeng
+ * {@link # https://github.com/RuffianZhong/Rx-Mvp}
  */
 public class MvpViewProxy<V extends IMvpView> implements InvocationHandler {
 
