@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.r.mvp.cn.MvpFragmentActivity;
 import com.r.mvp.cn.root.IMvpPresenter;
+import com.r.mvp.cn.root.IMvpView;
 import com.rx.mvp.cn.manager.ActivityStackManager;
 import com.rx.mvp.cn.utils.ToastUtils;
 import com.rx.mvp.cn.widget.RLoadingDialog;
@@ -25,7 +26,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  *
  * @author ZhongDaFeng
  */
-public abstract class BaseFragmentActivity extends MvpFragmentActivity implements EasyPermissions.PermissionCallbacks {
+public abstract class BaseFragmentActivity<V extends IMvpView, P extends IMvpPresenter<V>> extends MvpFragmentActivity<V, P> implements EasyPermissions.PermissionCallbacks {
 
     protected Context mContext;
     protected Unbinder unBinder;
@@ -92,11 +93,11 @@ public abstract class BaseFragmentActivity extends MvpFragmentActivity implement
     /**------------MVP通用方法避免每个组件都要实现--------------**/
 
     /**
-     * Presenter绑定入口，组件使用Presenter时存入具体值
+     * 创建 Presenter 函数实现，基类返回 null ，需要 Presenter 时在具体组件重写
      */
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
+    public P createPresenter() {
+        return null;
     }
 
     /**------------MVP->View层方法预实现{@link com.r.mvp.cn.MvpView}--------------**/

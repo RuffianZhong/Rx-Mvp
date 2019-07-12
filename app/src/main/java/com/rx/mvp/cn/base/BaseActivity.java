@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.r.mvp.cn.MvpAppCompatActivity;
 import com.r.mvp.cn.root.IMvpPresenter;
+import com.r.mvp.cn.root.IMvpView;
 import com.rx.mvp.cn.manager.ActivityStackManager;
 import com.rx.mvp.cn.utils.ToastUtils;
 import com.rx.mvp.cn.widget.RLoadingDialog;
@@ -23,10 +24,11 @@ import pub.devrel.easypermissions.EasyPermissions;
  * 备注:所有的Activity都继承自此Activity
  * 1.规范团队开发
  * 2.统一处理Activity所需配置,初始化
+ * 3. BaseActivity<V extends IMvpView, P extends IMvpPresenter<V>> extends MvpAppCompatActivity<V, P> 转发泛型，生成对应类型数据
  *
  * @author ZhongDaFeng
  */
-public abstract class BaseActivity extends MvpAppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public abstract class BaseActivity<V extends IMvpView, P extends IMvpPresenter<V>> extends MvpAppCompatActivity<V, P> implements EasyPermissions.PermissionCallbacks {
 
     protected Context mContext;
     protected Unbinder unBinder;
@@ -93,11 +95,11 @@ public abstract class BaseActivity extends MvpAppCompatActivity implements EasyP
     /**------------MVP通用方法避免每个组件都要实现--------------**/
 
     /**
-     * Presenter绑定入口，组件使用Presenter时存入具体值
+     * 创建 Presenter 函数实现，基类返回 null ，需要 Presenter 时在具体组件重写
      */
     @Override
-    protected IMvpPresenter[] getPresenterArray() {
-        return new IMvpPresenter[0];
+    public P createPresenter() {
+        return null;
     }
 
     /**------------MVP->View层方法预实现{@link com.r.mvp.cn.MvpView}--------------**/
