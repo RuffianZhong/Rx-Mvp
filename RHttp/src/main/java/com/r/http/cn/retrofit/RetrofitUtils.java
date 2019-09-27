@@ -1,12 +1,8 @@
 package com.r.http.cn.retrofit;
 
-import com.r.http.cn.RHttp;
-import com.r.http.cn.observer.HttpObserver;
 import com.r.http.cn.utils.LogUtils;
-import com.r.http.cn.utils.RequestUtils;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -50,10 +46,10 @@ public class RetrofitUtils {
      * @param baseUrl 基础URL
      * @return
      */
-    public Retrofit getRetrofit(String baseUrl) {
+    public Retrofit getRetrofit(String baseUrl, long timeout, TimeUnit timeUnit) {
         // Retrofit.Builder retrofit = new Retrofit.Builder();
         retrofit
-                .client(getOkHttpClientBase())
+                .client(getOkHttpClientBase(timeout, timeUnit))
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
@@ -130,9 +126,11 @@ public class RetrofitUtils {
     /**
      * 获取基础Http请求使用 OkHttpClient
      *
+     * @param timeout  超时时间
+     * @param timeUnit 超时时间单位
      * @return
      */
-    public OkHttpClient getOkHttpClientBase() {
+    public OkHttpClient getOkHttpClientBase(long timeout, TimeUnit timeUnit) {
         //日志拦截器
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
@@ -159,7 +157,7 @@ public class RetrofitUtils {
         };
 
         Interceptor[] interceptorArray = new Interceptor[]{logInterceptor, httpInterceptor};
-        return getOkHttpClient(RHttp.Configure.get().getTimeout(), RHttp.Configure.get().getTimeUnit(), interceptorArray);
+        return getOkHttpClient(timeout, timeUnit, interceptorArray);
     }
 
 }

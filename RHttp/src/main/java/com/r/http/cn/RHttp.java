@@ -64,9 +64,13 @@ public class RHttp {
     /*apiUrl*/
     private String apiUrl;
     /*String参数*/
-    String bodyString;
+    private String bodyString;
     /*是否强制JSON格式*/
-    boolean isJson;
+    private boolean isJson;
+    /*超时时长*/
+    private long timeout;
+    /*时间单位*/
+    private TimeUnit timeUnit;
 
 
     /*构造函数*/
@@ -83,9 +87,33 @@ public class RHttp {
         this.isJson = builder.isJson;
         this.bodyString = builder.bodyString;
         this.method = builder.method;
+        this.timeout = builder.timeout;
+        this.timeUnit = builder.timeUnit;
+    }
+
+
+    /*执行普通Http请求*/
+    public void execute(HttpCallback httpCallback) {
+        this.httpCallback = httpCallback;
+        if (httpCallback == null) {
+            throw new NullPointerException("HttpObserver must not null!");
+        } else {
+            doRequest();
+        }
+    }
+
+    /*执行普通Http请求*/
+    public void execute(UploadCallback uploadCallback) {
+        this.uploadCallback = uploadCallback;
+        if (uploadCallback == null) {
+            throw new NullPointerException("UploadCallback must not null!");
+        } else {
+            doUpload();
+        }
     }
 
     /*普通Http请求*/
+    @Deprecated
     public void request(HttpCallback httpCallback) {
         this.httpCallback = httpCallback;
         if (httpCallback == null) {
@@ -96,6 +124,7 @@ public class RHttp {
     }
 
     /*上传文件请求*/
+    @Deprecated
     public void upload(UploadCallback uploadCallback) {
         this.uploadCallback = uploadCallback;
         if (uploadCallback == null) {
@@ -204,7 +233,7 @@ public class RHttp {
         }
 
         /*请求处理*/
-        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl()).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
+        Observable apiObservable = RetrofitUtils.get().getRetrofit(getBaseUrl(), getTimeout(), getTimeUnit()).create(Api.class).upload(disposeApiUrl(), parameter, header, fileList);
 
         /* 被观察者 httpObservable */
         HttpObservable httpObservable = new HttpObservable.Builder(apiObservable)
@@ -223,6 +252,18 @@ public class RHttp {
     private String getBaseUrl() {
         //如果没有重新指定URL则是用默认配置
         return TextUtils.isEmpty(baseUrl) ? Configure.get().getBaseUrl() : baseUrl;
+    }
+
+    /*获取超时时间*/
+    private long getTimeout() {
+        //当前请求未设置超时时间则使用全局配置
+        return timeout == 0 ? Configure.get().getTimeout() : timeout;
+    }
+
+    /*获取超时时间单位*/
+    private TimeUnit getTimeUnit() {
+        //当前请求未设置超时时间单位则使用全局配置
+        return timeUnit == null ? Configure.get().getTimeUnit() : timeUnit;
     }
 
     /*ApiUrl处理*/
@@ -282,7 +323,7 @@ public class RHttp {
         }
 
         /*Api接口*/
-        Api apiService = RetrofitUtils.get().getRetrofit(getBaseUrl()).create(Api.class);
+        Api apiService = RetrofitUtils.get().getRetrofit(getBaseUrl(), getTimeout(), getTimeUnit()).create(Api.class);
         /*未指定默认POST*/
         if (method == null) method = Method.POST;
 
@@ -451,6 +492,10 @@ public class RHttp {
         String bodyString;
         /*是否强制JSON格式*/
         boolean isJson;
+        /*超时时长*/
+        long timeout;
+        /*时间单位*/
+        TimeUnit timeUnit;
 
         public Builder() {
         }
@@ -568,6 +613,18 @@ public class RHttp {
                     fileMap.put(new String(key), file);
                 }
             }
+            return this;
+        }
+
+        /*超时时长*/
+        public RHttp.Builder timeout(long timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
+        /*时间单位*/
+        public RHttp.Builder timeUnit(TimeUnit timeUnit) {
+            this.timeUnit = timeUnit;
             return this;
         }
 
