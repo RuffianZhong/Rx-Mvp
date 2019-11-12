@@ -55,7 +55,7 @@ public class RApp extends Application {
                 .addHeader(header)          //请求头
                 .lifecycle(this)            //自动管理生命周期，可以不传，如果未及时取消RxJava可能内存泄漏
                 .build()
-                .request(new HttpCallback<UserBean>() {
+                .execute(new HttpCallback<UserBean>() {
                     @Override
                     public UserBean onConvert(String data) {
                         //数据解析转换
@@ -108,7 +108,7 @@ public class RApp extends Application {
                 .file(fileMap)              //文件集合
                 .lifecycle(this)            //自动管理生命周期，可以不传，如果未及时取消RxJava可能内存泄漏
                 .build()
-                .upload(new UploadCallback<UserBean>() {
+                .execute(new UploadCallback<UserBean>() {
                     @Override
                     public void onProgress(File file, long currentSize, long totalSize, float progress, int currentIndex, int totalFile) {
                         //当前文件 file
