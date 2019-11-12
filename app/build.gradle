@@ -16,22 +16,25 @@ configurations.all {
         def requested = details.requested
         if (requested.group == 'com.android.support') {
             if (!requested.name.startsWith("multidex")) {
-                details.useVersion '25.3.1'//默认使用的版本
+                //details.useVersion '25.3.1'//默认使用的版本 28.0.0
+                details.useVersion '28.0.0'//默认使用的版本
             }
         }
     }
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 28
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.rx.mvp.cn"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //about studio 3.0
+        flavorDimensions "versionCode"
     }
 
     //签名配置
@@ -80,6 +83,9 @@ android {
             buildConfigField "boolean", "LOG_DEBUG", "true"
             buildConfigField "boolean", "IS_DEBUG", "true"
             buildConfigField "String", "API_HOST", "${API_HOST_RELEASE}"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            minifyEnabled true
             signingConfig signingConfigs.config
         }
         intranet {
@@ -99,22 +105,21 @@ android {
             debuggable true
         }
 
-        // 批量打包(gradle 3.0.0 以下)  https://www.jianshu.com/p/533240d222d3
-        applicationVariants.all { variant ->
-            variant.outputs.each { output ->
+        // apk重命名(gradle 3.0.0 以上)
+        android.applicationVariants.all { variant ->
+            variant.outputs.all { output ->
                 def outputFile = output.outputFile
                 if (outputFile != null && outputFile.name.endsWith('.apk')) {
                     //输出apk名称为：渠道名_版本名_时间.apk
                     def fileName
                     if (!project.hasProperty('FILE_NAME')) {
-                        //fileName = "RxMvp_${variant.productFlavors[0].name}_v${defaultConfig.versionCode}_${releaseTime()}.apk"
-                        if (variant.buildType.name.equals('release')) {
+                        if (variant.buildType.name.equals('official')) {
                             fileName = "RxMvp_v${defaultConfig.versionCode}_release.apk"
                         } else if (variant.buildType.name.equals('debug')) {
                             fileName = "RxMvp_v${defaultConfig.versionCode}_debug.apk"
-                        } else if (variant.buildType.name.equals('inside')) {
+                        } else if (variant.buildType.name.equals('intranet')) {
                             fileName = "RxMvp_v${defaultConfig.versionCode}_inside.apk"
-                        } else if (variant.buildType.name.equals('outside')) {
+                        } else if (variant.buildType.name.equals('extranet')) {
                             fileName = "RxMvp_v${defaultConfig.versionCode}_outside.apk"
                         } else {
                             fileName = "RxMvp_v${defaultConfig.versionCode}.apk"
@@ -122,37 +127,36 @@ android {
                     } else {
                         fileName = FILE_NAME
                     }
-                    output.outputFile = new File(outputFile.parent, fileName)
+                    outputFileName = fileName
                 }
             }
         }
-
     }
 
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     //compile 'com.android.support:recyclerview-v7:25.3.1'
-    testCompile 'junit:junit:4.12'
     /*view依赖注入*/
-    compile 'com.jakewharton:butterknife:8.6.0'
+    implementation 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
     /*动态权限*/
-    compile 'pub.devrel:easypermissions:0.4.2'
-    compile 'com.ruffian.library:RVPIndicator:1.0.6'
+    implementation 'pub.devrel:easypermissions:0.4.2'
+    implementation 'com.ruffian.library:RVPIndicator:1.0.6'
     /*基础控件封装*/
-    compile 'com.ruffian.library:RWidgetHelper:1.0.1'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.ruffian.library:RWidgetHelper:1.1.5'
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
     /*Adapter封装库*/
-    compile 'com.zhy:base-adapter:3.0.3'
+    implementation 'com.zhy:base-adapter:3.0.3'
     /*图片选择*/
-    compile 'com.lzy.widget:imagepicker:0.6.1'
+    implementation 'com.lzy.widget:imagepicker:0.6.1'
 
-    compile project(':RHttp')
-    compile project(':Mvp')
+    implementation project(':RHttp')
+    implementation project(':Mvp')
 }

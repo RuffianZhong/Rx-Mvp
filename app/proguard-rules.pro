@@ -78,16 +78,6 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 -keep public class com.project.mocha_patient.login.SignResponseData { private *; }
-# 使用Gson时需要配置Gson的解析对象及变量都不混淆。不然Gson会找不到变量。
-# 将下面替换成自己的实体类
--keep class com.qufan.vp.base.bean.** { *; }
--keep class com.qufan.vp.module.career.entity.** { *; }
--keep class com.qufan.vp.module.cashier.entity.** { *; }
--keep class com.qufan.vp.module.club.entity.** { *; }
--keep class com.qufan.vp.module.club.module.chat.entity.** { *; }
--keep class com.qufan.vp.module.message.entity.** { *; }
--keep class com.qufan.vp.module.mine.entity.** { *; }
--keep class com.qufan.vp.module.play.entity.** { *; }
 
 # OkHttp3
 -dontwarn com.squareup.okhttp3.**
@@ -121,3 +111,17 @@
 
 #API接口不混淆
 -keep class com.rx.mvp.cn.core.net.http.api.**{*;}
+
+#RHttp实体不混淆
+-keep class com.r.http.cn.model.**{*;}
+#下载相关实体不混淆（如果有自定义实体的情况下）
+-keep class com.rx.mvp.cn.model.load.** { *; }
+
+# LiteOrm (DB库混淆配置，后续将会移除第三方DB库)
+-keep public class com.litesuits.orm.LiteOrm { *; }
+-keep public class com.litesuits.orm.db.* { *; }
+-keep public class com.litesuits.orm.db.model.** { *; }
+-keep public class com.litesuits.orm.db.annotation.** { *; }
+-keep public class com.litesuits.orm.db.enums.** { *; }
+-keep public class com.litesuits.orm.log.* { *; }
+-keep public class com.litesuits.orm.db.assit.* { *; }
