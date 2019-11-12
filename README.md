@@ -1,7 +1,12 @@
 # Rx-Mvp
 
-# 项目使用 RHttp + MVP 模式构建 #
-
+> Rx-Mvp 项目包含两个部分功能/模块
+> 
+> RHttp : 基于 RxJava2 + Retrofit2 + OkHttp3 + RxLifecycle2 框架整合封装的网络请求框架
+> 
+> MVP :  MVC 框架的升级版本，通过 Presenter 桥梁连接 View 和 Model，使得模块之间更好的解耦
+> 
+> app ： Demo 代码，示例如何使用 MVP 架构项目；示例如何使用 RHttp 进行网络数据请求
 
 ## RHttp
 
@@ -10,10 +15,11 @@
 - 基本的get、post、put、delete、4种请求
 - 单/多文件上传 
 - 断点续传下载
-- 基本回调包含 onSuccess、onError、onCancel、onProgress（上传/下载）
+- 基本回调包含 onSuccess、onError、onCancel、onProgress（上传/下载带进度）
 - 支持自定义Callback
 - 支持https
-- 支持tag取消，也可取消全部   
+- 支持tag取消，支持取消全部请求
+- 支持绑定组件生命周期自动管理网络请求   
 - 支持链式调用
 - 支持表单格式，String，json格式数据提交请求
 
@@ -26,7 +32,23 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
 5. 上传带进度回调，多文件情况下，可以区分当前文件下标
 6. 断点续传大文件，多种下载状态满足不同下载需求
 
+##### RHttp-初始化(全局配置)
+```
+        //初始化RHttp
+        RHttp.Configure.get().init(this);
 
+
+        //初始化RHttp（全局配置）
+        RHttp.Configure.get()
+                .timeout(30)//请求超时时间
+                .timeUnit(TimeUnit.SECONDS)//超时时间单位
+                .baseHeader(new HashMap<String, Object>())//全局基础header，所有请求会包含
+                .baseParameter(new HashMap<String, Object>())//全局基础参数，所有请求会包含
+                .baseUrl("http://com.ruffian.http.cn")//基础URL
+                .showLog(true)//是否显示调试log
+                .init(this);//初始化，必须调用
+```
+##### RHttp-简单使用
 ```
         new RHttp.Builder()
                 .post()                     //请求方式
@@ -35,7 +57,7 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
                 .addHeader(header)          //请求头
                 .lifecycle(this)            //自动管理生命周期，可以不传，如果未及时取消RxJava可能内存泄漏
                 .build()
-                .request(new HttpCallback<UserBean>() {
+                .execute(new RHttpCallback<UserBean>() {
                     @Override
                     public UserBean onConvert(String data) {
                         /*数据解析转换*/
@@ -61,6 +83,20 @@ RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码�
   						//do sth.
                     }
                 });
+
+
+        RHttp http = new RHttp.Builder()
+                .tag("login_request")//设置请求tag，以便后续根据tag取消请求
+                .build();//构建http对象
+        
+        http.execute(new RHttpCallback() {});//执行请求（get/post.delete/put）
+        http.execute(new RUploadCallback() {});//执行请求（文件上传）
+        http.cancel();//取消当前网络请求
+        http.isCanceled();//当前网络请求是否已经取消
+
+        //静态方法
+        RHttp.cancel("login_request");//根据tag取消指定网络请求
+        RHttp.cancelAll();//取消所有网络请求
 ```
 
 ![](upload.gif) ![](download.gif) 
@@ -677,7 +713,74 @@ public interface AccountContract {
 
 }
 ```
+## 注意事项
+### 混淆代码
+```
+# OkHttp3
+-dontwarn com.squareup.okhttp3.**
+-keep class com.squareup.okhttp3.** { *;}
+-dontwarn okio.**
 
+# Okio
+-dontwarn com.squareup.**
+-dontwarn okio.**
+-keep public class org.codehaus.* { *; }
+-keep public class java.nio.* { *; }
+
+# Retrofit
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+# RxJava RxAndroid
+-dontwarn sun.misc.**
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+    long producerIndex;
+    long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+# Gson
+-keep public class com.google.gson.**
+-keep public class com.google.gson.** {public private protected *;}
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep public class com.project.mocha_patient.login.SignResponseData { private *; }
+
+##特殊提醒
+
+#API接口不混淆
+-keep class com.r.http.cn.api.**{*;}
+
+#RHttp实体不混淆
+-keep class com.r.http.cn.model.**{*;}
+#下载相关实体不混淆（如果有自定义下载实体的情况下）
+#com.rx.mvp.cn.model.load.DownloadBean => you  package
+-keep class com.rx.mvp.cn.model.load.DownloadBean { *; }
+
+# LiteOrm (DB库混淆配置，后续将会移除第三方DB库)
+-keep public class com.litesuits.orm.LiteOrm { *; }
+-keep public class com.litesuits.orm.db.* { *; }
+-keep public class com.litesuits.orm.db.model.** { *; }
+-keep public class com.litesuits.orm.db.annotation.** { *; }
+-keep public class com.litesuits.orm.db.enums.** { *; }
+-keep public class com.litesuits.orm.log.* { *; }
+-keep public class com.litesuits.orm.db.assit.* { *; }
+
+# 实体类解析字段使用 @SerializedName("XXX") 可以忽略，如果不是使用 @SerializedName 则自己的实体类不需要混淆
+# 使用Gson时需要配置Gson的解析对象及变量都不混淆。不然Gson会找不到变量。
+# 将下面替换成自己的实体类 com.rx.mvp.cn.model.account.entity => you  package
+-keep class com.rx.mvp.cn.model.account.entity.** { *; }
+
+```
+
+## Tips
 
 
 ```

@@ -1,20 +1,35 @@
 # RHttp
 
+> RHttp 是基于 RxJava2 + Retrofit2 + OkHttp3 + RxLifecycle2 框架整合封装的网络请求框架
+
 - 基本的get、post、put、delete、4种请求
 - 单/多文件上传 
 - 断点续传下载
+- 基本回调包含 onSuccess、onError、onCancel、onProgress（上传/下载带进度）
 - 支持自定义Callback
 - 支持https
-- 支持tag取消，也可取消全部   
+- 支持tag取消，支持取消全部请求
+- 支持绑定组件生命周期自动管理网络请求   
 - 支持链式调用
 - 支持表单格式，String，json格式数据提交请求
 
-### 1.全局配置
+RHttp 很屌吗？算不上，基本满足应用开发的所有需求，代码很简洁，体积小，功能齐全。这就够了
 
-为了 RHttp 框架需求，需要一些全局配置  **init** 必须调用
+1. 基于主流网络框架 Retrofit2 + OkHttp3 作为底层框架
+2. 使用 RxJava2 处理异步事件，线程间切换逻辑
+3. 使用 RxLifecycle2 管理生命周期，再也不用担心 RxJava 使用不当造成内存泄漏
+4. 基础网络请求，数据转换为 String 并提供 onConvert 方法提供开发者自定义转化数据
+5. 上传带进度回调，多文件情况下，可以区分当前文件下标
+6. 断点续传大文件，多种下载状态满足不同下载需求
 
-##### 1.1 如果你很懒，只为快速上手。 继承 Application 一行代码初始化
 
+### 1.初始化
+
+为了 RHttp 框架需求，使用前必须要初始化
+
+#### 1.1 基础初始化
+
+如果你很懒，只为快速上手。可以使用最基础的初始化。例如在 Application 
 ```
 public class RApp extends Application {
 
@@ -28,66 +43,142 @@ public class RApp extends Application {
 }
 ```
 
-##### 1.2 如果你需求比较复杂，以下是全部可选配置，开发者按需设置
+#### 1.2 配置一些全局设置
+
+如果你需求比较复杂，可以配置一些全局参数以满足复杂的需求，以下是全部可选配置，开发者按需设置
 ```
+        //初始化RHttp（全局配置）
         RHttp.Configure.get()
-                .baseUrl(baseUrl)				//基础URL
-                .baseHeader(baseHeader)			//全局Header
-                .baseParameter(baseParameter)	//全局参数
-                .timeout(60)					//连接&读&写超时时长
-                .timeUnit(TimeUnit.SECONDS)		//超时时长单位
-                .showLog(true)					//是否显示log
-                .init(this);					//初始化
+                .timeout(30)//请求超时时间
+                .timeUnit(TimeUnit.SECONDS)//超时时间单位
+                .baseHeader(new HashMap<String, Object>())//全局基础header，所有请求会包含
+                .baseParameter(new HashMap<String, Object>())//全局基础参数，所有请求会包含
+                .baseUrl("http://com.ruffian.http.cn")//基础URL
+                .showLog(true)//是否显示调试log
+                .init(this);//初始化，必须调用
 ```
 
 ### 2.使用请求
 
-##### 2.1 先看看全部可选参数设置
+#### 2.1 使用请求可配置参数
+以下是请求所有可配置参数，开发者按需设置
+
 ```
         RHttp http = new RHttp.Builder()
                 .post()// 任选一种请求方式 .post().get().put().delete()
+
                 .baseUrl("http://apicloud.mob.com/")//基础路径 如果全局配置了，这里可以省略
+
                 .apiUrl("user/login")//接口路径  如果不需要可以不填
-                .addParameter(header)//增加参数，重复调用可叠加
-                .setParameter(parameter)//设置参数，覆盖之前设置
-                .addHeader(header)//增加Header，重复调用可叠加
-                .setHeader(header)//设置Header，覆盖之前设置
-				.setBodyString(new Gson().toJson(user), true) //String/json格式提交数据 
+
+                .addParameter(new HashMap<String, Object>())//增加参数，重复调用可叠加
+
+                .setParameter(new HashMap<String, Object>())//设置参数，覆盖之前设置
+
+                .addHeader(new HashMap<String, Object>())//增加Header，重复调用可叠加
+
+                .setHeader(new HashMap<String, Object>())//设置Header，覆盖之前设置
+
+				//设置String 类型参数  覆盖之前设置  isJson:是否强制JSON格式    bodyString设置后Parameter则无效
+				.setBodyString(new Gson().toJson(user), true) //String/json格式提交数据  
+
                 .tag("someTag")//设置TAG 后续可根据tag取消请求
-				.file(fileMap)//map方式设置file文件
-                .file("key", list)//一个key对应多个文件
+
+				.file(Map<String, File> file)//map方式设置file文件
+
+                .file(String key, List<File> fileList)//一个key对应多个文件
+
                 .lifecycle(this)//设置自动管理生命周期 Activity/Fragment 继承 RxLifecycle (不设置可能导致RxJava使用内存泄漏)
+
                 .activityEvent(ActivityEvent.STOP)//手动管理属于Activity (此属性前提必须设置lifecycle)
+
                 .fragmentEvent(FragmentEvent.DESTROY_VIEW)//手动管理属于Fragment (此属性前提必须设置lifecycle)
+
+                .timeout(60)//本次请求超时时间，未设置使用全局配置
+
+                .timeUnit(TimeUnit.SECONDS)//超时时间单位，未设置使用全局配置
+
                 .build();
 ```
-- `addParameter()`  表示添加参数，重复调用可叠加
-- `setParameter() ` 表示重置参数，清空之前设置
-- `setBodyString(String text,boolean isJson) ` （只支持POST）表示 `String/json` 格式提交数据，会使 `add/setParameter` 设置的参数无效；
+- `addParameter(Map<String, Object> parameter)`  表示添加参数，重复调用可叠加
+- `setParameter(Map<String, Object> parameter) ` 表示重置参数，清空之前设置
+- `addHeader(Map<String, Object> header)` 增加Header，重复调用可叠加
+- `setHeader(Map<String, Object> header)` 设置Header，覆盖之前设置
+- `setBodyString(String text,boolean isJson) ` （仅POST）表示 `String/json` 格式提交数据，会使 `add/setParameter` 设置的参数无效；
   `boolean isJson` 参数意义： `true` 表示json格式 ； `false` 表示String格式   
-- `baseUrl()`  基础URL，如果全局配置了，这里可以省略
-- `apiUrl()`   基础路径 如果不需要可以不设置
-- `lifecycle()` 自动管理生命周期，防止RxJava内存泄漏
-- `activityEvent()` 适用于Activity的指定生命周期管理  依赖于 `lifecycle` 已经设置
-- `fragmentEvent()` 适用于Fragment的指定生命周期管理  依赖于 `lifecycle` 已经设置
+- `baseUrl(String baseUrl)`  基础URL，如果全局配置了，这里可以省略
+- `apiUrl(String apiUrl)`   基础路径 如果不需要可以不设置
+- `lifecycle(LifecycleProvider lifecycle)` 自动管理生命周期，防止RxJava内存泄漏
+- `activityEvent(ActivityEvent activityEvent)` 适用于Activity的指定生命周期管理  依赖于 `lifecycle` 已经设置
+- `fragmentEvent(FragmentEvent fragmentEvent)` 适用于Fragment的指定生命周期管理  依赖于 `lifecycle` 已经设置
 - `file(Map fileMap)` 上传文件时，文件map
 - `file(String key,List<File> list)` 上传文件时，文件list 适用一个key对应多个文件
+- `timeout(long timeout)`  本次请求超时时间，未设置使用全局配置
+- `timeUnit(TimeUnit timeUnit)` 超时时间单位，未设置使用全局配置
 
-##### 2.2 发起请求/上传文件/取消请求/取消全部
+#### 2.2 RHttp 请求可用 api 接口
+
+RHttp 对象提供一些可用 api 接口。如：**发起请求** ， **取消请求** 
 ```
-        http.request(new HttpCallback{});//发起请求
-        http.upload(new UploadCallback{});//上传文件的请求
-        http.isCanceled();//是否已经取消
-        http.cancel();//取消请求
-        RHttp.cancel("tag");//根据tag取消请求
-        RHttp.cancelAll();//取消全部请求
+		//构建 RHttp 对象
+        RHttp http = new RHttp.Builder()
+                .tag("login_request")//设置请求tag，以便后续根据tag取消请求
+                .build();//构建http对象
+        
+		//RHttp可用 api 
+        http.execute(new RHttpCallback() {});//执行请求（get/post.delete/put）
+        http.execute(new RUploadCallback() {});//执行请求（文件上传）
+        http.cancel();//取消当前网络请求
+        http.isCanceled();//当前网络请求是否已经取消
+
+        //静态方法
+        RHttp.cancel("login_request");//根据tag取消指定网络请求
+        RHttp.cancelAll();//取消所有网络请求
 ```
+
+- `execute(HttpCallback httpCallback)` 	执行普通Http请求
+- `execute(UploadCallback uploadCallback)`  执行上传文件请求
+执行请求，重载函数，根据传入 `Callback` 执行执行不同的请求
+- `cancel()` 取消当前网络请求
+- `isCanceled()` 当前网络请求是否已经取消
+- `RHttp.cancel(String tag)` 根据tag取消指定网络请求
+- `RHttp.cancelAll()` 取消所有网络请求
+
 
 ##### 2.3 回调函数
 
 ###### 2.3.1 `HttpCallback<T>` 基本网络请求回调
 
 ```
+			new HttpCallback<T>() {
+                    @Override
+                    public T onConvert(T data) throws Exception {
+                        //数据转换/解析
+						//开发者自己实现如何将 data 转化为 泛型指定 数据
+                		return data;
+                    }
+
+                    @Override
+                    public void onSuccess(Object value) {
+
+                    }
+
+                    @Override
+                    public void onError(int code, String desc) {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+
+                    @Override
+                    public boolean isBusinessOk() {
+                        return false;
+                    }
+                }
+
         http.request(new HttpCallback<String>() {
             @Override
             public String onConvert(String data) {
