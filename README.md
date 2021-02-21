@@ -1,4 +1,4 @@
-# Rx-Mvp 请关注我最新的架构模式 [JetpackMVVM](https://github.com/RuffianZhong/JetpackMVVM)  基于Rx-Mvp全方位升级
+# 请关注我最新的架构模式 [JetpackMVVM](https://github.com/RuffianZhong/JetpackMVVM) 基于Rx-Mvp全方位升级
 
 > Rx-Mvp 项目包含两个部分功能/模块
 > 
